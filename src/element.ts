@@ -12,7 +12,7 @@ export function setElAttr(el: Element, spec: Embed) {
     });
 }
 
-export function compareEmbedGT(a: Element | Embed, b: Element | Embed) {
+function compareEmbedGT(a: Element | Embed, b: Element | Embed) {
     const i = a instanceof Element
         ? { zone: Number(a.getAttr(ATTR_ZONE)), order: Number(a.getAttr(ATTR_ORDER))}
         : { zone: a.zone, order: a.order};
@@ -25,6 +25,32 @@ export function compareEmbedGT(a: Element | Embed, b: Element | Embed) {
         : i.order >= j.order;
 }
 
-export function isEmbedEl(el: Element) {
+function isEmbedEl(el: Element) {
     return el.hasClass(CLASS_EMBED);
+}
+
+export function insertLookAfter(anchorEl: Element, el: Element) {
+    if (isEmbedEl(anchorEl) && compareEmbedGT(anchorEl, el)) {
+        anchorEl.before(el);
+        return;
+    }
+    let nextEl = anchorEl.nextElementSibling;
+    while (nextEl && isEmbedEl(nextEl) && compareEmbedGT(el, nextEl)) {
+        anchorEl = nextEl;
+        nextEl = anchorEl.nextElementSibling;
+    }
+    anchorEl.after(el);
+}
+
+export function insertLookBefore(anchorEl: Element, el: Element) {
+    if (isEmbedEl(anchorEl) && compareEmbedGT(el, anchorEl)) {
+        anchorEl.after(el);
+        return;
+    }
+    let nextEl = anchorEl.previousElementSibling;
+    while (nextEl && isEmbedEl(nextEl) && compareEmbedGT(nextEl, el)) {
+        anchorEl = nextEl;
+        nextEl = anchorEl.previousElementSibling;
+    }
+    anchorEl.before(el);
 }
