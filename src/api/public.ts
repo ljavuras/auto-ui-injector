@@ -15,7 +15,7 @@ export class AutoUIInjectorAPI {
         if (embeds.add(spec)) {
             const embed = embeds.get(spec);
             this.app.workspace.iterateAllLeaves((leaf: WorkspaceLeaf) => {
-                inject(leaf.view, embed!);
+                inject(this.app, leaf.view, embed!);
             })
         }
     }

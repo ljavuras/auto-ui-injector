@@ -1,9 +1,10 @@
 import { Embed } from "./embed";
 
-const ATTR_ORDER = "data-embed-order";
-const ATTR_ZONE = "data-embed-zone";
-const CLASS_EMBED = "auto-ui";
+const ATTR_ORDER = "data-auto-ui-order";
+const ATTR_ZONE = "data-auto-ui-zone";
+const CLASS_EMBED = "auto-ui-embed";
 export const CLASS_TOP_BOTTOM_BAR = `view-embed ${CLASS_EMBED}`;
+export const CLASS_HEADER_FOOTER = CLASS_EMBED;
 
 export function setElAttr(el: Element, spec: Embed) {
     el.setAttrs({
