@@ -5,7 +5,6 @@ import { inject } from "../inject";
 
 export class AutoUIInjectorAPI {
     Zone = Zone;
-    UISpec = UISpec;
     
     constructor(
         private app: App,

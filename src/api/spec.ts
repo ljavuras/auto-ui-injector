@@ -24,7 +24,7 @@ export enum Zone {
 }
 
 type Position = {
-    zone: Zone;
+    zone: keyof typeof Zone;
     order: number;
     // anchor?: AnchorSpec;
 }
@@ -36,21 +36,8 @@ export type Content =
     | TFile
     | string;
 
-export class UISpec {
-    private position;
-    public condition;
-    public content;
-
-    get zone() { return this.position.zone; }
-    get order() { return this.position.order; }
-
-    constructor({ position, when, content } : {
-        position: Position,
-        when: Condition,
-        content: Content
-    }) {
-        this.position = position;
-        this.condition = when;
-        this.content = content;
-    }
+export type UISpec = {
+    position: Position,
+    condition: Condition,
+    content: Content,
 }

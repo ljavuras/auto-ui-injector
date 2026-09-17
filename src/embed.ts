@@ -8,8 +8,8 @@ export class Embed extends Component {
     private instances = new Set<WeakRef<HTMLElement>>();
     private recycler = new WeakMap<View, HTMLElement>();
 
-    get zone() { return this.spec.zone; }
-    get order() { return this.spec.order; }
+    get zone() { return Zone[this.spec.position.zone]; }
+    get order() { return this.spec.position.order; }
 
     constructor(
         private spec: UISpec,
