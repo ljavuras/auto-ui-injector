@@ -1,9 +1,12 @@
-import { ItemView } from "obsidian";
+import { App, ItemView } from "obsidian";
 import { Embed } from "../embed";
 import { CLASS_TOP_BOTTOM_BAR, insertLookBefore, insertLookAfter } from "../element";
 import { Zone } from "../api/spec";
+import type { InjectFunction } from "../inject";
 
-export function injectItemView(view: ItemView, embed: Embed) {
+export const injectItemView: InjectFunction<ItemView> = function(
+    app: App, view: ItemView, embed: Embed
+) {
     const { RunningHead, Eyebrow, RunningFoot } = Zone;
     const el = createDiv(CLASS_TOP_BOTTOM_BAR);
     embed.render(el, view);
