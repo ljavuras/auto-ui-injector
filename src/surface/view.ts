@@ -18,13 +18,19 @@ export const injectView: InjectFunction<View> = function(app: App, view: View, e
 
     if (embed.zone === RunningHead || embed.zone === Eyebrow) {
         const anchorEl = view.containerEl.firstElementChild;
-        if (!anchorEl) { view.containerEl.appendChild(el); }
-        insertLookAfter(anchorEl!, el);
+        if (!anchorEl) {
+            view.containerEl.appendChild(el);
+        } else {
+            insertLookAfter(anchorEl, el);
+        }
     }
-    
+
     else if (embed.zone === RunningFoot) {
         const anchorEl = view.containerEl.lastElementChild;
-        if (!anchorEl) { view.containerEl.appendChild(el); }
-        insertLookBefore(anchorEl!, el);
+        if (!anchorEl) {
+            view.containerEl.appendChild(el);
+        } else {
+            insertLookBefore(anchorEl, el);
+        }
     }
 }
