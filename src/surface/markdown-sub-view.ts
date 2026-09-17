@@ -1,7 +1,7 @@
 import { App, MarkdownEditView, MarkdownPreviewView } from "obsidian";
 import { Embed } from "../embed";
 import { Zone } from "../api/spec";
-import { CLASS_HEADER_FOOTER, insertLookAfter, insertLookBefore } from "../element";
+import { insertLookAfter, insertLookBefore } from "../element";
 
 export function injectMarkdownSubView(
     app: App,
@@ -28,8 +28,7 @@ export function injectMarkdownSubView(
         return;
     }
 
-    const el = createDiv(CLASS_HEADER_FOOTER);
-    embed.render(el, subView.view);
+    const el = embed.render(subView.view);
 
     switch (embed.zone) {
         case Kicker:

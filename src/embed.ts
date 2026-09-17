@@ -1,11 +1,13 @@
 import { Component, View } from "obsidian";
-import { UISpec } from "./api/spec";
+import { UISpec, Zone } from "./api/spec";
 import { shouldInject } from "./condition";
 import { renderContent } from "./render";
-import { setElAttr } from "./element";
+import { CLASS_HEADER_FOOTER, CLASS_TOP_BOTTOM_BAR, setElAttr } from "./element";
 
 export class Embed extends Component {
     private instances = new Set<WeakRef<HTMLElement>>();
+    private recycler = new WeakMap<View, HTMLElement>();
+
     get zone() { return this.spec.zone; }
     get order() { return this.spec.order; }
 
@@ -19,10 +21,30 @@ export class Embed extends Component {
         return shouldInject(this.spec.condition, view);
     }
 
-    render(el: HTMLElement, view: View) {
+    render(view: View) {
+        let cls, el;
+        el = this.recycler.get(view);
+        if (el) return el;
+        switch (this.zone) {
+            case Zone.RunningHead:
+            case Zone.Eyebrow:
+            case Zone.RunningFoot:
+                cls = CLASS_TOP_BOTTOM_BAR;
+                break;
+            case Zone.Kicker:
+            case Zone.Byline:
+            case Zone.Preface:
+            case Zone.Postscript:
+            case Zone.EndMatter:
+                cls = CLASS_HEADER_FOOTER;
+                break;
+        }
+        el = createDiv(cls);
         setElAttr(el, this);
         renderContent(el, view, this, this.spec.content);
         this.instances.add(new WeakRef(el));
+        this.recycler.set(view, el);
+        return el;
     }
 
     cleanUp() {

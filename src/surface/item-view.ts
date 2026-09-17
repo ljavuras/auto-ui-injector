@@ -1,6 +1,6 @@
 import { App, ItemView } from "obsidian";
 import { Embed } from "../embed";
-import { CLASS_TOP_BOTTOM_BAR, insertLookBefore, insertLookAfter } from "../element";
+import { insertLookBefore, insertLookAfter } from "../element";
 import { Zone } from "../api/spec";
 import type { InjectFunction } from "../inject";
 
@@ -8,8 +8,7 @@ export const injectItemView: InjectFunction<ItemView> = function(
     app: App, view: ItemView, embed: Embed
 ) {
     const { RunningHead, Eyebrow, RunningFoot } = Zone;
-    const el = createDiv(CLASS_TOP_BOTTOM_BAR);
-    embed.render(el, view);
+    const el = embed.render(view);
 
     if (embed.zone === RunningHead || embed.zone === Eyebrow) {
         const anchorEl = embed.zone === RunningHead? view.headerEl : view.contentEl;

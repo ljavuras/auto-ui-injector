@@ -1,7 +1,7 @@
 import { App, ItemView, View } from "obsidian";
 import { Zone } from "../api/spec";
 import { Embed } from "../embed";
-import { CLASS_TOP_BOTTOM_BAR, insertLookBefore, insertLookAfter } from "../element";
+import { insertLookBefore, insertLookAfter } from "../element";
 import type { InjectFunction } from "../inject";
 
 export function isVisible(view: View) {
@@ -13,8 +13,7 @@ export const injectView: InjectFunction<View> = function(app: App, view: View, e
     if (view instanceof ItemView) return;
 
     const { RunningHead, Eyebrow, RunningFoot } = Zone;
-    const el = createDiv(CLASS_TOP_BOTTOM_BAR);
-    embed.render(el, view);
+    const el = embed.render(view);
 
     if (embed.zone === RunningHead || embed.zone === Eyebrow) {
         const anchorEl = view.containerEl.firstElementChild;
