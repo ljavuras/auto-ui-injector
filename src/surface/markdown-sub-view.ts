@@ -1,4 +1,4 @@
-import { App, MarkdownEditView, MarkdownPreviewView } from "obsidian";
+import { App, MarkdownEditView, MarkdownPreviewView, MarkdownView } from "obsidian";
 import { Embed } from "../embed";
 import { Zone } from "../api/spec";
 import { insertLookAfter, insertLookBefore } from "../element";
@@ -8,36 +8,23 @@ import { ejectAllOfView, injectZonesOfView } from "../inject";
 
 const { RunningHead, Eyebrow, RunningFoot } = Zone;
 const { Kicker, Byline, Preface, Postscript, EndMatter } = Zone;
+const zones = [Kicker, Byline, Preface, Postscript, EndMatter];
 
-export function injectMarkdownSubView(
-    app: App,
-    subView: MarkdownEditView | MarkdownPreviewView,
-    embed: Embed
-) {
-    if ((subView as MarkdownEditView)?.sourceMode) return;
+function propertiesIsSource(app: App) {
+    return app.vault.config.propertiesInDocument === "source";
+}
 
-    const view = subView.view;
+function injectEl(view: MarkdownView, zone: Zone, el: HTMLElement) {
     const anchorEl = ({
         [Kicker]: view.inlineTitleEl,
         [Byline]: view.metadataEditor.containerEl,
         [Preface]: view.metadataEditor.containerEl,
         [Postscript]: view.backlinksEl,
         [EndMatter]: view.backlinksEl,
-    } as Record<Zone, HTMLElement | undefined>)[embed.zone];
-
+    } as Record<Zone, HTMLElement | undefined>)[zone];
     if (!anchorEl) return;
 
-    // Leave preface embeds to CodeMirror extension if property display is set
-    // to source (not hidden or visible)
-    if (embed.zone === Preface
-        && app.vault.config.propertiesInDocument === "source"
-    ) {
-        return;
-    }
-
-    const el = embed.render(subView.view);
-
-    switch (embed.zone) {
+    switch (zone) {
         case Kicker:
         case Byline:
         case Postscript:
@@ -48,28 +35,62 @@ export function injectMarkdownSubView(
             insertLookAfter(anchorEl, el);
             break;
     }
+    
+}
+
+export function injectMarkdownSubView(
+    subView: MarkdownEditView | MarkdownPreviewView,
+    embed: Embed,
+) {
+    if (subView.type === "source" && isSourceMode(subView)) return;
+
+    // Leave preface embeds to CodeMirror extension if property display is set
+    // to source (not hidden or visible)
+    if (embed.zone === Preface && propertiesIsSource(subView.app)) return;
+
+    if (!zones.contains(embed.zone)) return;
+
+    const view = subView.view;
+    const el = embed.render(view);
+    injectEl(view, embed.zone, el);
+}
+
+export function refreshMarkdownSubView(subView: MarkdownEditView | MarkdownPreviewView) {
+    if (subView.type === "source" && isSourceMode(subView)) return;
+
+    const view = subView.view;
+    embeds.values()
+        .filter(e => zones.contains(e.zone))
+        .filter(e => !propertiesIsSource(subView.app) || e.zone !== Preface)
+        .filter(e => e.shouldInject(subView.view))
+        .forEach(embed => {
+            const el = embed.rerender(view);
+            if (el) injectEl(view, embed.zone, el);
+        });
 }
 
 function show(this: MarkdownEditView | MarkdownPreviewView) {
-    const e = embeds.values()
-        .filter(e => [Kicker, Byline, Preface, Postscript, EndMatter].contains(e.zone))
+    const es = embeds.values()
+        .filter(e => zones.contains(e.zone))
+        .filter(e => !propertiesIsSource(this.app) || e.zone !== Preface)
         .filter(e => e.shouldInject(this.view))
         .sort((a, b) => a.compare(b));
+    const view = this.view;
 
-    e.filter(e => e.zone === Kicker).forEach(e => {
-        this.view.inlineTitleEl.before(e.render(this.view));
+    es.filter(e => e.zone === Kicker).forEach(e => {
+        view.inlineTitleEl.before(e.render(this.view));
     });
-    e.filter(e => e.zone === Byline).forEach(e => {
-        this.view.metadataEditor.containerEl.before(e.render(this.view));
+    es.filter(e => e.zone === Byline).forEach(e => {
+        view.metadataEditor.containerEl.before(e.render(this.view));
     });
-    e.filter(e => e.zone === Preface).reverse().forEach(e => {
-        this.view.metadataEditor.containerEl.after(e.render(this.view));
+    es.filter(e => e.zone === Preface).reverse().forEach(e => {
+        view.metadataEditor.containerEl.after(e.render(this.view));
     });
-    e.filter(e => e.zone === Postscript).forEach(e => {
-        this.view.backlinksEl.before(e.render(this.view));
+    es.filter(e => e.zone === Postscript).forEach(e => {
+        view.backlinksEl.before(e.render(this.view));
     });
-    e.filter(e => e.zone === EndMatter).reverse().forEach(e => {
-        this.view.backlinksEl.after(e.render(this.view));
+    es.filter(e => e.zone === EndMatter).reverse().forEach(e => {
+        view.backlinksEl.after(e.render(this.view));
     });
 }
 
@@ -96,7 +117,7 @@ export function patchMarkdownSubViews(markdownEditView: typeof MarkdownEditView)
                 if (isSourceMode(this)) {
                     ejectAllOfView(this.view);
                 } else {
-                    injectZonesOfView(this.app, this.view);
+                    injectZonesOfView(this.view);
                 }
             }
         },
@@ -106,7 +127,7 @@ export function patchMarkdownSubViews(markdownEditView: typeof MarkdownEditView)
             return function(this: MarkdownPreviewView) {
                 original.apply(this);
                 if (isSourceMode(this)) {
-                    injectZonesOfView(this.app, this.view, topBottomBarZones);
+                    injectZonesOfView(this.view, topBottomBarZones);
                 } 
                 show.call(this);
             }

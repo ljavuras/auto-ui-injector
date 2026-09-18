@@ -1,21 +1,20 @@
-import { App, ItemView, View } from "obsidian";
+import { ItemView, MarkdownView, View } from "obsidian";
 import { Zone } from "../api/spec";
 import { Embed } from "../embed";
 import { insertLookBefore, insertLookAfter } from "../element";
-import type { InjectFunction } from "../inject";
+import type { InjectFunction, RefreshFunction } from "../inject";
+import { embeds } from "../embeds";
+import { isSourceMode } from "./markdown-view";
+
+const { RunningHead, Eyebrow, RunningFoot } = Zone;
+const zones = [RunningHead, Eyebrow, RunningFoot];
 
 export function isVisible(view: View) {
     return view.leaf.isVisible();
 }
 
-export const injectView: InjectFunction<View> = function(app: App, view: View, embed: Embed) {
-    // Leave top/bottom bar injections to `injectItemView`
-    if (view instanceof ItemView) return;
-
-    const { RunningHead, Eyebrow, RunningFoot } = Zone;
-    const el = embed.render(view);
-
-    if (embed.zone === RunningHead || embed.zone === Eyebrow) {
+function injectEl(view: View, zone: Zone, el: HTMLElement) {
+    if (zone === RunningHead || zone === Eyebrow) {
         const anchorEl = view.containerEl.firstElementChild;
         if (!anchorEl) {
             view.containerEl.appendChild(el);
@@ -24,7 +23,7 @@ export const injectView: InjectFunction<View> = function(app: App, view: View, e
         }
     }
 
-    else if (embed.zone === RunningFoot) {
+    else if (zone === RunningFoot) {
         const anchorEl = view.containerEl.lastElementChild;
         if (!anchorEl) {
             view.containerEl.appendChild(el);
@@ -32,4 +31,30 @@ export const injectView: InjectFunction<View> = function(app: App, view: View, e
             insertLookBefore(anchorEl, el);
         }
     }
+}
+
+export const injectView: InjectFunction<View> = function(view: View, embed: Embed) {
+    // Embeds are injected around headerEl and contentEl in ItemView
+    if (view instanceof ItemView) return;
+
+    const el = embed.render(view);
+    injectEl(view, embed.zone, el);
+}
+
+export const refreshView: RefreshFunction<View> = function(view: View) {
+    // Embeds are injected around headerEl and contentEl in ItemView
+    if (view instanceof ItemView) return;
+
+    // No embeds are visible in source mode
+    if (view instanceof MarkdownView && isSourceMode(view)) return;
+
+    const es = embeds.values().filter(embed => zones.contains(embed.zone));
+    es.forEach(embed => {
+        if (!embed.shouldInject(view)) {
+            embed.removeFromView(view);
+            return;
+        }
+        const el = embed.rerender(view);
+        if (el) injectEl(view, embed.zone, el);
+    })
 }

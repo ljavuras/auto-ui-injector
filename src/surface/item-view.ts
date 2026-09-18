@@ -1,11 +1,28 @@
-import { App, ItemView, MarkdownEditView, MarkdownPreviewView, MarkdownView } from "obsidian";
+import { ItemView, MarkdownEditView, MarkdownPreviewView, MarkdownView } from "obsidian";
 import { Embed } from "../embed";
 import { insertLookBefore, insertLookAfter } from "../element";
 import { Zone } from "../api/spec";
-import type { InjectFunction } from "../inject";
+import type { InjectFunction, RefreshFunction } from "../inject";
+import { isSourceMode } from "./markdown-view";
+import { embeds } from "../embeds";
+
+const { RunningHead, Eyebrow, RunningFoot } = Zone;
+const zones = [RunningHead, Eyebrow, RunningFoot];
+
+function injectEl(view: ItemView, zone: Zone, el: HTMLElement) {
+    if (zone === RunningHead || zone === Eyebrow) {
+        const anchorEl = zone === RunningHead? view.headerEl : view.contentEl;
+        insertLookBefore(anchorEl, el);
+    }
+
+    else if (zone === RunningFoot) {
+        const anchorEl = view.contentEl;
+        insertLookAfter(anchorEl, el);
+    }
+}
 
 export const injectItemView: InjectFunction<ItemView> = function(
-    app: App, view: ItemView, embed: Embed
+    view: ItemView, embed: Embed
 ) {
     // Skip injection if MarkdownView is in source mode
     if (view instanceof MarkdownView
@@ -13,16 +30,21 @@ export const injectItemView: InjectFunction<ItemView> = function(
         && view.getState().source
     ) return;
 
-    const { RunningHead, Eyebrow, RunningFoot } = Zone;
     const el = embed.render(view);
+    injectEl(view, embed.zone, el);
+}
 
-    if (embed.zone === RunningHead || embed.zone === Eyebrow) {
-        const anchorEl = embed.zone === RunningHead? view.headerEl : view.contentEl;
-        insertLookBefore(anchorEl, el);
-    }
+export const refreshItemView: RefreshFunction<ItemView> = function(view: ItemView) {
+    // No embeds are visible in source mode
+    if (view instanceof MarkdownView && isSourceMode(view)) return;
 
-    else if (embed.zone === RunningFoot) {
-        const anchorEl = view.contentEl;
-        insertLookAfter(anchorEl, el);
-    }
+    const es = embeds.values().filter(embed => zones.contains(embed.zone));
+    es.forEach(embed => {
+        if (!embed.shouldInject(view)) {
+            embed.removeFromView(view);
+            return;
+        }
+        const el = embed.rerender(view);
+        if (el) injectEl(view, embed.zone, el);
+    })
 }

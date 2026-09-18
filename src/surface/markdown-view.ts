@@ -1,14 +1,21 @@
-import { App, MarkdownEditView, MarkdownPreviewView, MarkdownView } from "obsidian";
+import { MarkdownEditView, MarkdownPreviewView, MarkdownView } from "obsidian";
 import { Embed } from "../embed";
-import { injectMarkdownSubView } from "./markdown-sub-view";
-import { InjectFunction } from "../inject";
+import { injectMarkdownSubView, refreshMarkdownSubView } from "./markdown-sub-view";
+import { InjectFunction, RefreshFunction } from "../inject";
+
+export function isSourceMode(view: MarkdownView) {
+    return view.getState().source;
+}
 
 export const injectMarkdownView: InjectFunction<MarkdownView> = function(
-    app: App, view: MarkdownView, embed: Embed
+    view: MarkdownView, embed: Embed
 ) {
     injectMarkdownSubView(
-        app,
         view.currentMode as MarkdownEditView | MarkdownPreviewView,
         embed
     );
+}
+
+export const refreshMarkdownView: RefreshFunction<MarkdownView> = function(view: MarkdownView) {
+    refreshMarkdownSubView(view.currentMode as MarkdownEditView | MarkdownPreviewView);
 }

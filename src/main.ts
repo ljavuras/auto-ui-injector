@@ -1,7 +1,9 @@
 import {
+	FileView,
 	MarkdownEditView,
 	MarkdownView,
 	Plugin,
+	TFile,
 } from 'obsidian';
 import {
 	DEFAULT_SETTINGS,
@@ -12,7 +14,7 @@ import { AutoUIInjectorAPI } from './api/public';
 import { embeds } from './embeds';
 import { patchMarkdownSubViews } from './surface/markdown-sub-view';
 import { Zone } from './api/spec';
-import { ejectAllOfZone, injectAllOfZone } from './inject';
+import { ejectAllOfZone, injectAllOfZone, refresh } from './inject';
 
 export default class AutoUIInjector extends Plugin {
 	settings!: Settings;
@@ -41,7 +43,12 @@ export default class AutoUIInjector extends Plugin {
 			})
 		}
 
-		this.app.vault.on("config-changed", this.onConfigChange.bind(this));
+		this.registerEvent(
+			this.app.vault.on("config-changed", this.onConfigChange.bind(this))
+		);
+		this.registerEvent(
+			this.app.workspace.on("file-open", this.onFileOpen.bind(this))
+		);
 	}
 
 	onunload() {
@@ -60,12 +67,20 @@ export default class AutoUIInjector extends Plugin {
 		await this.saveData(this.settings);
 	}
 
+	onFileOpen(file: TFile) {
+		this.app.workspace.iterateAllLeaves((leaf) => {
+			if (leaf.view instanceof FileView && leaf.view.file === file) {
+				refresh(leaf.view);
+			}
+		});
+	}
+
 	onConfigChange(configName: string) {
 		if (configName === "propertiesInDocument") {
 			if (this.app.vault.config.propertiesInDocument === "source") {
 				ejectAllOfZone(Zone.Preface);
 			} else {
-				injectAllOfZone(app, Zone.Preface);
+				injectAllOfZone(Zone.Preface);
 			}
 		}
 	}

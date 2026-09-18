@@ -1,12 +1,13 @@
-import { App, ItemView, MarkdownView, View } from "obsidian";
+import { ItemView, MarkdownView, View } from "obsidian";
 import { Embed } from "./embed";
-import { injectView, isVisible } from "./surface/view";
-import { injectItemView } from "./surface/item-view";
-import { injectMarkdownView } from "./surface/markdown-view";
+import { injectView, isVisible, refreshView } from "./surface/view";
+import { injectItemView, refreshItemView } from "./surface/item-view";
+import { injectMarkdownView, refreshMarkdownView } from "./surface/markdown-view";
 import { Zone } from "./api/spec";
 import { embeds } from "./embeds";
 
-export type InjectFunction<T extends View> = (app: App, view: T, embed: Embed) => void;
+export type InjectFunction<T extends View> = (view: T, embed: Embed) => void;
+export type RefreshFunction<T extends View> = (view: T) => void;
 
 const injectors = new Map<typeof View, InjectFunction<any>>([
     [View, injectView],
@@ -14,22 +15,37 @@ const injectors = new Map<typeof View, InjectFunction<any>>([
     [MarkdownView, injectMarkdownView],
 ]);
 
-export function inject(app: App, view: View, embed: Embed) {
+const refreshers = new Map<typeof View, RefreshFunction<any>>([
+    [View, refreshView],
+    [ItemView, refreshItemView],
+    [MarkdownView, refreshMarkdownView],
+]);
+
+export function inject(view: View, embed: Embed) {
     if (!isVisible(view)) return;
     if (!embed.shouldInject(view)) return;
 
     for (const [Type, injector] of injectors) {
         if (view instanceof Type) {
-            injector(app, view, embed);
+            injector(view, embed);
         }
     }
 }
 
-export function injectAllOfZone(app: App, zone: Zone | undefined) {
+export function refresh(view: View) {
+    if (!isVisible(view)) return;
+    for (const [Type, refresher] of refreshers) {
+        if (view instanceof Type) {
+            refresher(view);
+        }
+    }
+}
+
+export function injectAllOfZone(zone: Zone | undefined) {
     embeds.values()
         .filter(e => zone === undefined || e.zone === zone)
         .forEach(e => {
-            app.workspace.iterateAllLeaves(l => inject(app, l.view, e));
+            app.workspace.iterateAllLeaves(l => inject(l.view, e));
         });
 }
 
@@ -39,13 +55,11 @@ export function ejectAllOfZone(zone: Zone | undefined) {
         .forEach(e => e.removeAll());
 }
 
-export function injectZonesOfView(
-    app: App, view: View, zone?: Zone | Zone[]
-) {
+export function injectZonesOfView(view: View, zone?: Zone | Zone[]) {
     const zones = Array.isArray(zone)? zone : [zone];
     embeds.values()
         .filter(e => zone === undefined || zones.contains(e.zone))
-        .forEach(e => inject(app, view, e));
+        .forEach(e => inject(view, e));
 }
 
 export function ejectAllOfView(view: View) {

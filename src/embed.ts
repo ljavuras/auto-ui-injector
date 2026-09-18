@@ -1,4 +1,4 @@
-import { Component, View } from "obsidian";
+import { Component, FileView, View } from "obsidian";
 import { UISpec, Zone } from "./api/spec";
 import { shouldInject } from "./condition";
 import { renderContent } from "./render";
@@ -6,7 +6,7 @@ import { CLASS_HEADER_FOOTER, CLASS_TOP_BOTTOM_BAR, setElAttr } from "./element"
 
 export class Embed extends Component {
     private instances = new Set<WeakRef<HTMLElement>>();
-    private recycler = new WeakMap<View, HTMLElement>();
+    private recycler = new WeakMap<View, [HTMLElement, string | undefined]>();
 
     get zone() { return Zone[this.spec.position.zone]; }
     get order() { return this.spec.position.order; }
@@ -22,8 +22,8 @@ export class Embed extends Component {
     }
 
     render(view: View) {
-        let cls, el;
-        el = this.recycler.get(view);
+        let cls;
+        let [el, path] = this.recycler.get(view) || [];
         if (el) return el;
         switch (this.zone) {
             case Zone.RunningHead:
@@ -43,12 +43,29 @@ export class Embed extends Component {
         setElAttr(el, this);
         renderContent(el, view, this, this.spec.content);
         this.instances.add(new WeakRef(el));
-        this.recycler.set(view, el);
+        path = view instanceof FileView? view.file?.path : undefined;
+        this.recycler.set(view, [el, path]);
         return el;
     }
 
+    /**
+     * Returns el if it's a new render, else directly replace old embed with
+     * new embed and return null.
+     */
+    rerender(view: View): HTMLElement | null {
+        const [oldEl, oldPath] = this.recycler.get(view) || [];
+        if (!oldEl) return this.render(view);  // New render
+
+        // No path change, skip render
+        if (view instanceof FileView && oldPath === view.file?.path) return null;
+    
+        const newEl = this.render(view);
+        oldEl.replaceWith(newEl);
+        return null;
+    }
+
     removeFromView(view: View) {
-        this.recycler.get(view)?.remove();
+        this.recycler.get(view)?.[0].remove();
     }
 
     removeAll() {
@@ -64,10 +81,8 @@ export class Embed extends Component {
     }
 
     compare(b: Embed) {
-        if (this.zone === b.zone) {
-            if (this.order === b.order) return 0;
-            return this.order < b.order? -1 : 1;
-        }
-        return this.zone < b.zone? -1 : 1;
+        return this.zone === b.zone
+            ? this.order - b.order
+            : this.zone - b.zone;
     }
 }
