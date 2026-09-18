@@ -53,6 +53,7 @@ export function injectMarkdownSubView(
 function show(this: MarkdownEditView | MarkdownPreviewView) {
     const e = embeds.values()
         .filter(e => [Kicker, Byline, Preface, Postscript, EndMatter].contains(e.zone))
+        .filter(e => e.shouldInject(this.view))
         .sort((a, b) => a.compare(b));
 
     e.filter(e => e.zone === Kicker).forEach(e => {
