@@ -29,6 +29,7 @@
 		"esbuild@0.25.5": true
 	},
 	"dependencies": {
-		"monkey-around": "^3.0.0"
+		"monkey-around": "^3.0.0",
+		"zod": "^4.6.5"
 	}
 }
