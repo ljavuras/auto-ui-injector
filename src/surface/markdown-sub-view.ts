@@ -73,24 +73,27 @@ function show(this: MarkdownEditView | MarkdownPreviewView) {
     });
 }
 
+function isSourceMode(subView: MarkdownEditView | MarkdownPreviewView) {
+    return subView.view.getState().source;
+}
+
 export function patchMarkdownSubViews(markdownEditView: typeof MarkdownEditView) {
     const topBottomBarZones = [RunningHead, Eyebrow, RunningFoot];
-    let unwrapMarkdownEditView = around(markdownEditView.prototype, {
+    const unwrapMarkdownEditView = around(markdownEditView.prototype, {
         show(original) {
             return function(this: MarkdownEditView) {
                 original.apply(this);
-                if (this.sourceMode) {
+                if (isSourceMode(this)) {
                     ejectAllOfView(this.view);
-                    return;
+                } else {
+                    show.call(this);
                 }
-                show.call(this);
-                injectZonesOfView(this.app, this.view, topBottomBarZones);
             }
         },
         toggleSource(original) {
             return function(this: MarkdownEditView) {
                 original.apply(this);
-                if (this.sourceMode) {
+                if (isSourceMode(this)) {
                     ejectAllOfView(this.view);
                 } else {
                     injectZonesOfView(this.app, this.view);
@@ -98,12 +101,14 @@ export function patchMarkdownSubViews(markdownEditView: typeof MarkdownEditView)
             }
         },
     });
-    let unwrapMarkdownPreviewView = around(MarkdownPreviewView.prototype, {
+    const unwrapMarkdownPreviewView = around(MarkdownPreviewView.prototype, {
         show(original) {
             return function(this: MarkdownPreviewView) {
                 original.apply(this);
+                if (isSourceMode(this)) {
+                    injectZonesOfView(this.app, this.view, topBottomBarZones);
+                } 
                 show.call(this);
-                injectZonesOfView(this.app, this.view, topBottomBarZones);
             }
         }
     });

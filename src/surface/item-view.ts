@@ -10,7 +10,7 @@ export const injectItemView: InjectFunction<ItemView> = function(
     // Skip injection if MarkdownView is in source mode
     if (view instanceof MarkdownView
         && (view.currentMode as MarkdownEditView | MarkdownPreviewView).type === "source"
-        && view.editMode.sourceMode
+        && view.getState().source
     ) return;
 
     const { RunningHead, Eyebrow, RunningFoot } = Zone;
