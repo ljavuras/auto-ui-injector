@@ -58,4 +58,12 @@ export class Embed extends Component {
         this.cleanUp();
         this.unload();
     }
+
+    compare(b: Embed) {
+        if (this.zone === b.zone) {
+            if (this.order === b.order) return 0;
+            return this.order < b.order? -1 : 1;
+        }
+        return this.zone < b.zone? -1 : 1;
+    }
 }

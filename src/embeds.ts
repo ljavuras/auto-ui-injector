@@ -32,6 +32,10 @@ class Embeds {
         }
         this.container.clear();
     }
+
+    values() {
+        return [...this.container.values()];
+    }
 }
 
 export let embeds: Embeds = new Embeds();
