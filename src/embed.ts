@@ -47,15 +47,15 @@ export class Embed extends Component {
         return el;
     }
 
-    cleanUp() {
+    removeAll() {
         this.instances.forEach((ref: WeakRef<HTMLElement>) => {
             ref.deref()?.remove();
         });
-        this.instances.clear();
     }
 
     destory() {
-        this.cleanUp();
+        this.removeAll();
+        this.instances.clear();
         this.unload();
     }
 
