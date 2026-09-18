@@ -4,7 +4,9 @@ import { Zone } from "../api/spec";
 import { insertLookAfter, insertLookBefore } from "../element";
 import { embeds } from "../embeds";
 import { around } from "monkey-around"
+import { ejectAllOfView, injectZonesOfView } from "../inject";
 
+const { RunningHead, Eyebrow, RunningFoot } = Zone;
 const { Kicker, Byline, Preface, Postscript, EndMatter } = Zone;
 
 export function injectMarkdownSubView(
@@ -12,6 +14,8 @@ export function injectMarkdownSubView(
     subView: MarkdownEditView | MarkdownPreviewView,
     embed: Embed
 ) {
+    if ((subView as MarkdownEditView)?.sourceMode) return;
+
     const view = subView.view;
     const anchorEl = ({
         [Kicker]: view.inlineTitleEl,
@@ -69,19 +73,36 @@ function show(this: MarkdownEditView | MarkdownPreviewView) {
 }
 
 export function patchMarkdownSubViews(markdownEditView: typeof MarkdownEditView) {
+    const topBottomBarZones = [RunningHead, Eyebrow, RunningFoot];
     let unwrapMarkdownEditView = around(markdownEditView.prototype, {
         show(original) {
             return function(this: MarkdownEditView) {
                 original.apply(this);
+                if (this.sourceMode) {
+                    ejectAllOfView(this.view);
+                    return;
+                }
                 show.call(this);
+                injectZonesOfView(this.app, this.view, topBottomBarZones);
             }
-        }
+        },
+        toggleSource(original) {
+            return function(this: MarkdownEditView) {
+                original.apply(this);
+                if (this.sourceMode) {
+                    ejectAllOfView(this.view);
+                } else {
+                    injectZonesOfView(this.app, this.view);
+                }
+            }
+        },
     });
     let unwrapMarkdownPreviewView = around(MarkdownPreviewView.prototype, {
         show(original) {
             return function(this: MarkdownPreviewView) {
                 original.apply(this);
                 show.call(this);
+                injectZonesOfView(this.app, this.view, topBottomBarZones);
             }
         }
     });

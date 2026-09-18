@@ -47,6 +47,10 @@ export class Embed extends Component {
         return el;
     }
 
+    removeFromView(view: View) {
+        this.recycler.get(view)?.remove();
+    }
+
     removeAll() {
         this.instances.forEach((ref: WeakRef<HTMLElement>) => {
             ref.deref()?.remove();

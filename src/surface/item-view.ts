@@ -1,4 +1,4 @@
-import { App, ItemView } from "obsidian";
+import { App, ItemView, MarkdownEditView, MarkdownPreviewView, MarkdownView } from "obsidian";
 import { Embed } from "../embed";
 import { insertLookBefore, insertLookAfter } from "../element";
 import { Zone } from "../api/spec";
@@ -7,6 +7,12 @@ import type { InjectFunction } from "../inject";
 export const injectItemView: InjectFunction<ItemView> = function(
     app: App, view: ItemView, embed: Embed
 ) {
+    // Skip injection if MarkdownView is in source mode
+    if (view instanceof MarkdownView
+        && (view.currentMode as MarkdownEditView | MarkdownPreviewView).type === "source"
+        && view.editMode.sourceMode
+    ) return;
+
     const { RunningHead, Eyebrow, RunningFoot } = Zone;
     const el = embed.render(view);
 

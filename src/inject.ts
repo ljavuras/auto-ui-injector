@@ -38,3 +38,16 @@ export function ejectAllOfZone(zone: Zone | undefined) {
         .filter(e => zone === undefined || e.zone === zone)
         .forEach(e => e.removeAll());
 }
+
+export function injectZonesOfView(
+    app: App, view: View, zone?: Zone | Zone[]
+) {
+    const zones = Array.isArray(zone)? zone : [zone];
+    embeds.values()
+        .filter(e => zone === undefined || zones.contains(e.zone))
+        .forEach(e => inject(app, view, e));
+}
+
+export function ejectAllOfView(view: View) {
+    embeds.values().forEach(e => e.removeFromView(view));
+}
