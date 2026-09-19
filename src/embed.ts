@@ -41,7 +41,7 @@ export class Embed extends Component {
         }
         el = createDiv(cls);
         setElAttr(el, this);
-        renderContent(el, view, this, this.spec.content);
+        renderContent(el, view, this.spec.content);
         this.instances.add(new WeakRef(el));
         path = view instanceof FileView? view.file?.path : undefined;
         this.recycler.set(view, [el, path]);

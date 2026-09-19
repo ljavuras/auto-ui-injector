@@ -33,8 +33,8 @@ type Position = {
 export type Condition = (view: View) => boolean
 
 export type Content = 
-    | ((el: HTMLElement, view: View, component: Component) => void)
-    | TFile
+    | ((el: HTMLElement, view: View) => void)
+    // | TFile
     | string;
 
 export type UISpec = {
@@ -56,9 +56,8 @@ const SpecObj = z.object({
         z.function({input: [
             z.instanceof(HTMLElement),
             z.instanceof(View),
-            z.instanceof(Component)
         ]}),
-        z.instanceof(TFile, { error: (iss) => `Invalid input: expected TFile, received ${iss.input}` }),
+        // z.instanceof(TFile, { error: (iss) => `Invalid input: expected TFile, received ${iss.input}` }),
         z.string(),
     ]),
 })
@@ -67,7 +66,10 @@ export function isValidSpec(obj: any) {
     try {
         SpecObj.parse(obj);
     } catch(e) {
-        console.error("Auto UI Injector error: Invalid 'UISpec' registered through 'registerAutoUI'.\n", e);
+        console.error(
+            "Auto UI Injector error: Invalid 'UISpec' registered through 'registerAutoUI'.\n",
+            e
+        );
         return false;
     }
     return true;
