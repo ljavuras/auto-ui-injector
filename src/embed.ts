@@ -21,10 +21,10 @@ export class Embed extends Component {
         return shouldInject(this.spec.condition, view);
     }
 
-    render(view: View) {
+    render(view: View, force: boolean = false) {
         let cls;
         let [el, path] = this.recycler.get(view) || [];
-        if (el) return el;
+        if (!force && el) return el;
         switch (this.zone) {
             case Zone.RunningHead:
             case Zone.Eyebrow:
@@ -59,7 +59,7 @@ export class Embed extends Component {
         // No path change, skip render
         if (view instanceof FileView && oldPath === view.file?.path) return null;
     
-        const newEl = this.render(view);
+        const newEl = this.render(view, true);
         oldEl.replaceWith(newEl);
         return null;
     }
