@@ -1,7 +1,7 @@
 import { UISpec } from "./api/spec";
 import { Embed } from "./embed";
 
-class Embeds {
+class EmbedRegister {
     container: Map<UISpec, Embed> = new Map();
     
     add(spec: UISpec) {
@@ -38,4 +38,4 @@ class Embeds {
     }
 }
 
-export let embeds: Embeds = new Embeds();
+export let embedRegister = new EmbedRegister();

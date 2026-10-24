@@ -1,5 +1,5 @@
 import { App, WorkspaceLeaf } from "obsidian";
-import { embeds } from "../embeds";
+import { embedRegister } from "../embed-register";
 import { isValidSpec, UISpec, Zone } from "./spec";
 import { inject } from "../inject";
 
@@ -12,8 +12,8 @@ export class AutoUIInjectorAPI {
 
     registerAutoUI(spec: UISpec) {
         if (!isValidSpec(spec)) return;
-        if (embeds.add(spec)) {
-            const embed = embeds.get(spec);
+        if (embedRegister.add(spec)) {
+            const embed = embedRegister.get(spec);
             this.app.workspace.iterateAllLeaves((leaf: WorkspaceLeaf) => {
                 inject(leaf.view, embed!);
             })
@@ -21,6 +21,6 @@ export class AutoUIInjectorAPI {
     }
 
     unregisterAutoUI(spec: UISpec) {
-        embeds.remove(spec);
+        embedRegister.remove(spec);
     }
 }

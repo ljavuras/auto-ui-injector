@@ -3,7 +3,7 @@ import { Zone } from "../api/spec";
 import { Embed } from "../embed";
 import { insertLookBefore, insertLookAfter } from "../element";
 import type { InjectFunction, RefreshFunction } from "../inject";
-import { embeds } from "../embeds";
+import { embedRegister } from "../embed-register";
 import { isSourceMode } from "./markdown-view";
 
 const { RunningHead, Eyebrow, RunningFoot } = Zone;
@@ -48,8 +48,8 @@ export const refreshView: RefreshFunction<View> = function(view: View) {
     // No embeds are visible in source mode
     if (view instanceof MarkdownView && isSourceMode(view)) return;
 
-    const es = embeds.values().filter(embed => zones.contains(embed.zone));
-    es.forEach(embed => {
+    const embeds = embedRegister.values().filter(embed => zones.contains(embed.zone));
+    embeds.forEach(embed => {
         if (!embed.shouldInject(view)) {
             embed.removeFromView(view);
             return;

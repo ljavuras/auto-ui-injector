@@ -21,7 +21,7 @@ export class Embed extends Component {
         return shouldInject(this.spec.condition, view);
     }
 
-    render(view: View, force: boolean = false) {
+    render(view: View, force: boolean = false): HTMLElement {
         let cls;
         let [el, path] = this.recycler.get(view) || [];
         if (!force && el) return el;

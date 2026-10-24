@@ -1,4 +1,4 @@
-import { Component, TFile, View } from "obsidian";
+import { View } from "obsidian";
 import * as z from "zod";
 
 export enum Zone {

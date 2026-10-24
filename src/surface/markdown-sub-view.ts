@@ -2,7 +2,7 @@ import { App, MarkdownEditView, MarkdownPreviewView, MarkdownView } from "obsidi
 import { Embed } from "../embed";
 import { Zone } from "../api/spec";
 import { insertLookAfter, insertLookBefore } from "../element";
-import { embeds } from "../embeds";
+import { embedRegister } from "../embed-register";
 import { around } from "monkey-around"
 import { ejectAllOfView, injectZonesOfView } from "../inject";
 
@@ -59,7 +59,7 @@ export function refreshMarkdownSubView(subView: MarkdownEditView | MarkdownPrevi
     if (subView.type === "source" && isSourceMode(subView)) return;
 
     const view = subView.view;
-    embeds.values()
+    embedRegister.values()
         .filter(e => zones.contains(e.zone))
         .filter(e => !propertiesIsSource(subView.app) || e.zone !== Preface)
         .filter(e => e.shouldInject(subView.view))
@@ -70,26 +70,26 @@ export function refreshMarkdownSubView(subView: MarkdownEditView | MarkdownPrevi
 }
 
 function show(this: MarkdownEditView | MarkdownPreviewView) {
-    const es = embeds.values()
+    const embeds = embedRegister.values()
         .filter(e => zones.contains(e.zone))
         .filter(e => !propertiesIsSource(this.app) || e.zone !== Preface)
         .filter(e => e.shouldInject(this.view))
         .sort((a, b) => a.compare(b));
     const view = this.view;
 
-    es.filter(e => e.zone === Kicker).forEach(e => {
+    embeds.filter(e => e.zone === Kicker).forEach(e => {
         view.inlineTitleEl.before(e.render(this.view));
     });
-    es.filter(e => e.zone === Byline).forEach(e => {
+    embeds.filter(e => e.zone === Byline).forEach(e => {
         view.metadataEditor.containerEl.before(e.render(this.view));
     });
-    es.filter(e => e.zone === Preface).reverse().forEach(e => {
+    embeds.filter(e => e.zone === Preface).reverse().forEach(e => {
         view.metadataEditor.containerEl.after(e.render(this.view));
     });
-    es.filter(e => e.zone === Postscript).forEach(e => {
+    embeds.filter(e => e.zone === Postscript).forEach(e => {
         view.backlinksEl.before(e.render(this.view));
     });
-    es.filter(e => e.zone === EndMatter).reverse().forEach(e => {
+    embeds.filter(e => e.zone === EndMatter).reverse().forEach(e => {
         view.backlinksEl.after(e.render(this.view));
     });
 }

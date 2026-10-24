@@ -4,7 +4,7 @@ import { injectView, isVisible, refreshView } from "./surface/view";
 import { injectItemView, refreshItemView } from "./surface/item-view";
 import { injectMarkdownView, refreshMarkdownView } from "./surface/markdown-view";
 import { Zone } from "./api/spec";
-import { embeds } from "./embeds";
+import { embedRegister } from "./embed-register";
 
 export type InjectFunction<T extends View> = (view: T, embed: Embed) => void;
 export type RefreshFunction<T extends View> = (view: T) => void;
@@ -21,6 +21,12 @@ const refreshers = new Map<typeof View, RefreshFunction<any>>([
     [MarkdownView, refreshMarkdownView],
 ]);
 
+/**
+ * Injects an embed into a view.
+ * @param view - View to be injected.
+ * @param embed - The embed that gets injected.
+ * @returns {void}
+ */
 export function inject(view: View, embed: Embed) {
     if (!isVisible(view)) return;
     if (!embed.shouldInject(view)) return;
@@ -42,7 +48,7 @@ export function refresh(view: View) {
 }
 
 export function injectAllOfZone(zone: Zone | undefined) {
-    embeds.values()
+    embedRegister.values()
         .filter(e => zone === undefined || e.zone === zone)
         .forEach(e => {
             app.workspace.iterateAllLeaves(l => inject(l.view, e));
@@ -50,18 +56,18 @@ export function injectAllOfZone(zone: Zone | undefined) {
 }
 
 export function ejectAllOfZone(zone: Zone | undefined) {
-    embeds.values()
+    embedRegister.values()
         .filter(e => zone === undefined || e.zone === zone)
         .forEach(e => e.removeAll());
 }
 
 export function injectZonesOfView(view: View, zone?: Zone | Zone[]) {
     const zones = Array.isArray(zone)? zone : [zone];
-    embeds.values()
+    embedRegister.values()
         .filter(e => zone === undefined || zones.contains(e.zone))
         .forEach(e => inject(view, e));
 }
 
 export function ejectAllOfView(view: View) {
-    embeds.values().forEach(e => e.removeFromView(view));
+    embedRegister.values().forEach(e => e.removeFromView(view));
 }

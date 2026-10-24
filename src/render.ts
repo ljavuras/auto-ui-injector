@@ -12,6 +12,6 @@ export function renderContent(
 
     else if (typeof content === "string") {
         const sourcePath = (view as FileView).file?.path ?? "";
-        MarkdownRenderer.render(view.app, content, el, sourcePath, view);
+        void MarkdownRenderer.render(view.app, content, el, sourcePath, view);
     }
 }
