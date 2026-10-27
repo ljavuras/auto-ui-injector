@@ -1,5 +1,5 @@
 import { UISpec } from "./api/spec";
-import { Embed } from "./embed";
+import { Embed } from "./embed/embed";
 
 class EmbedRegister {
     container: Map<UISpec, Embed> = new Map();

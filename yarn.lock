@@ -469,6 +469,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@lezer/common@npm:^1.5.4":
+  version: 1.5.4
+  resolution: "@lezer/common@npm:1.5.4"
+  checksum: 10c0/0b49098d796da1f3d5ee4ac28071a494cc0a6a165251fdc60eed08e93cc13a9c6b09325311b34e523773f1364554d5bc6495d4a1c55d1d5394b8ad0d64f5c17d
+  languageName: node
+  linkType: hard
+
 "@lezer/highlight@npm:^1.0.0":
   version: 1.2.3
   resolution: "@lezer/highlight@npm:1.2.3"
@@ -946,6 +953,7 @@ __metadata:
     "@codemirror/state": "npm:^6.7.6"
     "@codemirror/view": "npm:^6.43.13"
     "@eslint/js": "npm:^9.39.4"
+    "@lezer/common": "npm:^1.5.4"
     "@obsidian-typings/obsidian-public-latest": "npm:^6.36.0"
     "@types/node": "npm:^22.15.17"
     "@yarnpkg/esbuild-plugin-pnp": "npm:^3.0.0-rc.15"
@@ -958,7 +966,7 @@ __metadata:
     obsidian: "npm:latest"
     typescript: "npm:^5.8.3"
     typescript-eslint: "npm:^8.59.1"
-    zod: "npm:^4.6.5"
+    zod: "npm:^4.6.7"
   languageName: unknown
   linkType: soft
 
@@ -3476,7 +3484,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tslib@npm:^2.6.2":
+"tslib@npm:^2.4.0, tslib@npm:^2.6.2":
   version: 2.8.1
   resolution: "tslib@npm:2.8.1"
   checksum: 10c0/9c4759110a19c53f992d9aae23aac5ced636e99887b51b9e61def52611732872ff7668757d4e4c61f19691e36f4da981cd9485e869b4a7408d689f6bf1f14e62
@@ -3755,9 +3763,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"zod@npm:^4.6.5":
-  version: 4.6.5
-  resolution: "zod@npm:4.6.5"
-  checksum: 10c0/32eb6c5e98becbe045675b2141c3611451c16ba567f9779231d79af41c4d651ca1c22f154aef7e6c6e77b929f23e43f1154ca05b82e119e922353725d6776af5
+"zod@npm:^4.6.7":
+  version: 4.6.7
+  resolution: "zod@npm:4.6.7"
+  checksum: 10c0/4ce2eb14034317b7254e347ca37b5ad591cf8333147030cf05b9b5d31692d45073f7f2747aa50cf8c6b29012194d2b22978cecc89969cf34a0d18e89d0ee7d7b
   languageName: node
   linkType: hard

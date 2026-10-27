@@ -1,5 +1,5 @@
 import { MarkdownEditView, MarkdownPreviewView, MarkdownView } from "obsidian";
-import { Embed } from "../embed";
+import { Embed } from "../embed/embed";
 import { injectMarkdownSubView, refreshMarkdownSubView } from "./markdown-sub-view";
 import { InjectFunction, RefreshFunction } from "../inject";
 

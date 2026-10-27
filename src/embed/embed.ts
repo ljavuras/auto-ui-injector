@@ -1,8 +1,11 @@
 import { Component, FileView, View } from "obsidian";
-import { UISpec, Zone } from "./api/spec";
+import { AnchorSpec, UISpec, Zone } from "../api/spec";
 import { shouldInject } from "./condition";
 import { renderContent } from "./render";
-import { CLASS_HEADER_FOOTER, CLASS_TOP_BOTTOM_BAR, setElAttr } from "./element";
+import { CLASS_BODY, CLASS_HEADER_FOOTER, CLASS_TOP_BOTTOM_BAR, setElAttr } from "../element";
+import { Tree } from "@lezer/common";
+import { EditorState } from "@codemirror/state";
+import { locateOffset } from "./locate";
 
 export class Embed extends Component {
     private instances = new Set<WeakRef<HTMLElement>>();
@@ -17,8 +20,15 @@ export class Embed extends Component {
         super();
     }
 
-    shouldInject(view: View) {
+    shouldInject(view: View): boolean {
         return shouldInject(this.spec.condition, view);
+    }
+
+    locate(tree: Tree, state: EditorState): number | undefined {
+        // Only embeds in document body need to call this function
+        if (this.zone !== Zone.Body) return undefined;
+
+        return locateOffset(this.spec.position.anchor as AnchorSpec, tree, state);
     }
 
     render(view: View, force: boolean = false): HTMLElement {
@@ -37,6 +47,10 @@ export class Embed extends Component {
             case Zone.Postscript:
             case Zone.EndMatter:
                 cls = CLASS_HEADER_FOOTER;
+                break;
+            case Zone.Body:
+            case Zone.Afterword:
+                cls = CLASS_BODY;
                 break;
         }
         el = createDiv(cls);

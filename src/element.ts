@@ -1,4 +1,4 @@
-import { Embed } from "./embed";
+import { Embed } from "./embed/embed";
 
 const ATTR_ORDER = "data-auto-ui-order";
 const ATTR_ZONE = "data-auto-ui-zone";
@@ -15,20 +15,32 @@ export function setElAttr(el: Element, spec: Embed) {
 }
 
 /**
- * Returns true if order of `a` is greater than `b` (`a` should appear after
- * `b` in document).
+ * @returns -1 if `a` should order before `b`, 0 if `a` and `b` are equal, and
+ * 1 if `a` should order after `b`.
  */
-function compareEmbedGT(a: Element | Embed, b: Element | Embed): boolean {
+export function compareEmbed(a: Element | Embed, b: Element | Embed): -1 | 0 | 1 {
     const i = a instanceof Element
         ? { zone: Number(a.getAttr(ATTR_ZONE)), order: Number(a.getAttr(ATTR_ORDER))}
         : { zone: a.zone, order: a.order};
     const j = b instanceof Element
         ? { zone: Number(b.getAttr(ATTR_ZONE)), order: Number(b.getAttr(ATTR_ORDER))}
         : { zone: b.zone, order: b.order};
-    
-    return i.zone !== j.zone
-        ? i.zone > j.zone
-        : i.order >= j.order;
+
+    if (i.zone !== j.zone) {
+        return i.zone > j.zone? 1 : -1;
+    } else if (i.order === j.order) {
+        return 0;
+    } else {
+        return i.order > j.order? 1 : -1;
+    }
+}
+
+/**
+ * Returns true if order of `a` is greater than `b` (`a` should appear after
+ * `b` in document).
+ */
+function compareEmbedGT(a: Element | Embed, b: Element | Embed): boolean {
+    return compareEmbed(a, b) > 0;
 }
 
 function isEmbedEl(el: Element) {

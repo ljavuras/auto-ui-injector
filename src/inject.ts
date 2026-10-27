@@ -1,5 +1,5 @@
 import { ItemView, MarkdownView, View } from "obsidian";
-import { Embed } from "./embed";
+import { Embed } from "./embed/embed";
 import { injectView, isVisible, refreshView } from "./surface/view";
 import { injectItemView, refreshItemView } from "./surface/item-view";
 import { injectMarkdownView, refreshMarkdownView } from "./surface/markdown-view";
@@ -25,9 +25,8 @@ const refreshers = new Map<typeof View, RefreshFunction<any>>([
  * Injects an embed into a view.
  * @param view - View to be injected.
  * @param embed - The embed that gets injected.
- * @returns {void}
  */
-export function inject(view: View, embed: Embed) {
+export function inject(view: View, embed: Embed): void {
     if (!isVisible(view)) return;
     if (!embed.shouldInject(view)) return;
 

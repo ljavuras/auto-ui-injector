@@ -1,5 +1,5 @@
 import { FileView, MarkdownRenderer, View } from "obsidian";
-import { Content } from "./api/spec";
+import { Content } from "../api/spec";
 
 export function renderContent(
     el: HTMLElement,

@@ -1,5 +1,5 @@
 import { ItemView, MarkdownEditView, MarkdownPreviewView, MarkdownView } from "obsidian";
-import { Embed } from "../embed";
+import { Embed } from "../embed/embed";
 import { insertLookBefore, insertLookAfter } from "../element";
 import { Zone } from "../api/spec";
 import type { InjectFunction, RefreshFunction } from "../inject";

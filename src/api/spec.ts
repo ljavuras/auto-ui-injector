@@ -1,5 +1,8 @@
 import { View } from "obsidian";
 import * as z from "zod";
+import { EditorState } from "@codemirror/state";
+import { ReadViewRenderer } from "@obsidian-typings/obsidian-public-latest";
+import { Tree } from "@lezer/common";
 
 export enum Zone {
     /* Top Bar */
@@ -27,7 +30,17 @@ export enum Zone {
 type Position = {
     zone: keyof typeof Zone;
     order: number;
-    // anchor?: AnchorSpec;
+    anchor?: AnchorSpec;
+}
+
+export enum AnchorType {
+    Raw = "raw",
+}
+
+export type AnchorSpec = {
+    type: AnchorType.Raw,
+    locateSourceOffset: (tree: Tree, state: EditorState) => number,
+    locatePreviewAnchorEl: (renderer: ReadViewRenderer) => HTMLElement,
 }
 
 export type Condition = (view: View) => boolean
@@ -47,6 +60,19 @@ const SpecObj = z.object({
     position: z.object({
         zone: z.literal(Object.keys(Zone).filter(k => isNaN(Number(k)))),
         order: z.number(),
+        anchor: z.optional(z.object({
+            type: z.literal(Object.values(AnchorType)),
+            locateSourceOffset: z.function({
+                // input: [z.instanceof(Tree), z.instanceof(EditorState)],
+                input: [z.any(), z.any()],
+                output: z.number()
+            }),
+            locatePreviewAnchorEl: z.function({
+                // input: [z.instanceof(ReadViewRenderer)],
+                input: [z.any()],
+                output: z.instanceof(HTMLElement)
+            }),
+        }))
     }),
     condition: z.function({
         input: [z.instanceof(View)],

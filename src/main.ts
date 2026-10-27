@@ -15,6 +15,7 @@ import { embedRegister } from './embed-register';
 import { patchMarkdownSubViews } from './surface/markdown-sub-view';
 import { Zone } from './api/spec';
 import { ejectAllOfZone, injectAllOfZone, refresh } from './inject';
+import { autoUIField, autoUIUpdateEffect } from './surface/codemirror';
 
 export default class AutoUIInjector extends Plugin {
 	settings!: Settings;
@@ -51,10 +52,17 @@ export default class AutoUIInjector extends Plugin {
 		this.registerEvent(
 			this.app.workspace.on("file-open", this.onFileOpen.bind(this))
 		);
+
+		this.registerEditorExtension(autoUIField);
 	}
 
 	onunload() {
 		embedRegister.clear();
+		this.app.workspace.getLeavesOfType('markdown').forEach(leaf => {
+			(leaf.view as MarkdownView).editMode?.editor?.cm.dispatch({
+				effects: autoUIUpdateEffect.of(null)
+			});
+		});
 	}
 
 	async loadSettings() {
@@ -93,6 +101,11 @@ export default class AutoUIInjector extends Plugin {
 			} else {
 				injectAllOfZone(Zone.Preface);
 			}
+			this.app.workspace.getLeavesOfType('markdown').forEach(leaf => {
+				(leaf.view as MarkdownView).editMode?.editor?.cm.dispatch({
+					effects: autoUIUpdateEffect.of(null)
+				});
+			});
 		}
 	}
 }
