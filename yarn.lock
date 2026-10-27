@@ -748,6 +748,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@yarnpkg/esbuild-plugin-pnp@npm:^3.0.0-rc.15":
+  version: 3.0.0-rc.15
+  resolution: "@yarnpkg/esbuild-plugin-pnp@npm:3.0.0-rc.15"
+  dependencies:
+    tslib: "npm:^2.4.0"
+  peerDependencies:
+    esbuild: ">=0.10.0"
+  checksum: 10c0/5095bc316862971add31ca1fadb0095b6ad15f25120f6ab3a06086bb6a7be93c2f3c45bff80d5976689fc89b0e9bf82bd3d410e205c852739874d32d050c4e57
+  languageName: node
+  linkType: hard
+
 "acorn-jsx@npm:^5.3.2":
   version: 5.3.2
   resolution: "acorn-jsx@npm:5.3.2"
@@ -937,6 +948,7 @@ __metadata:
     "@eslint/js": "npm:^9.39.4"
     "@obsidian-typings/obsidian-public-latest": "npm:^6.36.0"
     "@types/node": "npm:^22.15.17"
+    "@yarnpkg/esbuild-plugin-pnp": "npm:^3.0.0-rc.15"
     esbuild: "npm:0.25.5"
     eslint: "npm:^9.39.4"
     eslint-plugin-obsidianmd: "npm:^0.4.2"
