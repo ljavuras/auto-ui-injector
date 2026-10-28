@@ -35,6 +35,7 @@ export class Embed extends Component {
         let cls;
         let [el, path] = this.recycler.get(view) || [];
         if (!force && el) return el;
+        el?.remove();
         switch (this.zone) {
             case Zone.RunningHead:
             case Zone.Eyebrow:
