@@ -63,7 +63,7 @@ export function ejectAllOfZone(zone: Zone | undefined) {
 export function injectZonesOfView(view: View, zone?: Zone | Zone[]) {
     const zones = Array.isArray(zone)? zone : [zone];
     embedRegister.values()
-        .filter(e => zone === undefined || zones.contains(e.zone))
+        .filter(e => zone === undefined || zones.includes(e.zone))
         .forEach(e => inject(view, e));
 }
 

@@ -3,7 +3,7 @@ import { AnchorSpec, UISpec, Zone } from "../api/spec";
 import { shouldInject } from "./condition";
 import { renderContent } from "./render";
 import { CLASS_BODY, CLASS_HEADER_FOOTER, CLASS_TOP_BOTTOM_BAR, setElAttr } from "../element";
-import { Tree } from "@lezer/common";
+import type { Tree } from "@lezer/common";
 import { EditorState } from "@codemirror/state";
 import { locateOffset } from "./locate";
 

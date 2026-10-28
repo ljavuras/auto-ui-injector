@@ -48,7 +48,7 @@ export function injectMarkdownSubView(
     // to source (not hidden or visible)
     if (embed.zone === Preface && propertiesIsSource(subView.app)) return;
 
-    if (!zones.contains(embed.zone)) return;
+    if (!zones.includes(embed.zone)) return;
 
     const view = subView.view;
     const el = embed.render(view);
@@ -60,7 +60,7 @@ export function refreshMarkdownSubView(subView: MarkdownEditView | MarkdownPrevi
 
     const view = subView.view;
     embedRegister.values()
-        .filter(e => zones.contains(e.zone))
+        .filter(e => zones.includes(e.zone))
         .filter(e => !propertiesIsSource(subView.app) || e.zone !== Preface)
         .filter(e => e.shouldInject(subView.view))
         .forEach(embed => {
@@ -71,7 +71,7 @@ export function refreshMarkdownSubView(subView: MarkdownEditView | MarkdownPrevi
 
 function show(this: MarkdownEditView | MarkdownPreviewView) {
     const embeds = embedRegister.values()
-        .filter(e => zones.contains(e.zone))
+        .filter(e => zones.includes(e.zone))
         .filter(e => !propertiesIsSource(this.app) || e.zone !== Preface)
         .filter(e => e.shouldInject(this.view))
         .sort((a, b) => a.compare(b));

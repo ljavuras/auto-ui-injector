@@ -25,7 +25,7 @@ export const injectItemView: InjectFunction<ItemView> = function(
     view: ItemView, embed: Embed
 ) {
     // Skip if not is zones ItemView should handle
-    if (!zones.contains(embed.zone)) return;
+    if (!zones.includes(embed.zone)) return;
 
     // Skip if MarkdownView is in source mode
     if (view instanceof MarkdownView
@@ -42,7 +42,7 @@ export const refreshItemView: RefreshFunction<ItemView> = function(view: ItemVie
     if (view instanceof MarkdownView && isSourceMode(view)) return;
 
     const embeds = embedRegister.values()
-        .filter(embed => zones.contains(embed.zone));
+        .filter(embed => zones.includes(embed.zone));
     embeds.forEach(embed => {
         if (!embed.shouldInject(view)) {
             embed.removeFromView(view);

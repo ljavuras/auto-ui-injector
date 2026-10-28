@@ -37,6 +37,9 @@ export const injectView: InjectFunction<View> = function(view: View, embed: Embe
     // Embeds are injected around headerEl and contentEl in ItemView
     if (view instanceof ItemView) return;
 
+    // Skip if not in zones View should handle
+    if (!zones.includes(embed.zone)) return;
+
     const el = embed.render(view);
     injectEl(view, embed.zone, el);
 }
@@ -48,7 +51,7 @@ export const refreshView: RefreshFunction<View> = function(view: View) {
     // No embeds are visible in source mode
     if (view instanceof MarkdownView && isSourceMode(view)) return;
 
-    const embeds = embedRegister.values().filter(embed => zones.contains(embed.zone));
+    const embeds = embedRegister.values().filter(embed => zones.includes(embed.zone));
     embeds.forEach(embed => {
         if (!embed.shouldInject(view)) {
             embed.removeFromView(view);
