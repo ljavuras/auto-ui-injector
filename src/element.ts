@@ -1,3 +1,4 @@
+import { Zone, ZoneIndex } from "./api/spec";
 import { Embed } from "./embed/embed";
 
 const ATTR_ORDER = "data-auto-ui-order";
@@ -20,11 +21,17 @@ export function setElAttr(el: Element, spec: Embed) {
  */
 export function compareEmbed(a: Element | Embed, b: Element | Embed): -1 | 0 | 1 {
     const i = a instanceof Element
-        ? { zone: Number(a.getAttr(ATTR_ZONE)), order: Number(a.getAttr(ATTR_ORDER))}
-        : { zone: a.zone, order: a.order};
+        ? {
+            zone: ZoneIndex[a.getAttr(ATTR_ZONE) as Zone],
+            order: Number(a.getAttr(ATTR_ORDER))
+        }
+        : { zone: ZoneIndex[a.zone], order: a.order };
     const j = b instanceof Element
-        ? { zone: Number(b.getAttr(ATTR_ZONE)), order: Number(b.getAttr(ATTR_ORDER))}
-        : { zone: b.zone, order: b.order};
+        ? {
+            zone: ZoneIndex[b.getAttr(ATTR_ZONE) as Zone],
+            order: Number(b.getAttr(ATTR_ORDER))
+        }
+        : { zone: ZoneIndex[b.zone], order: b.order };
 
     if (i.zone !== j.zone) {
         return i.zone > j.zone? 1 : -1;

@@ -2,33 +2,37 @@ import { View } from "obsidian";
 import * as z from "zod";
 import { EditorState } from "@codemirror/state";
 import { ReadViewRenderer } from "@obsidian-typings/obsidian-public-latest";
-import { Tree } from "@lezer/common";
+import type { Tree } from "@lezer/common";
 
 export enum Zone {
     /* Top Bar */
-    RunningHead,
+    RunningHead = "running-head",
     // Tab title bar
-    Eyebrow,
+    Eyebrow = "eyebrow",
 
     /* Viewport */
-    Kicker,
+    Kicker = "kicker",
     // Inline title
-    Byline,
+    Byline = "byline",
     // Properties
-    Preface,
-    Body,
-    Afterword,
+    Preface = "preface",
+    Body = "body",
+    Afterword = "afterword",
     // Footnotes
-    Postscript,
+    Postscript = "postscript",
     // Backlinks
-    EndMatter,
+    EndMatter = "end-matter",
 
     /* Bottom Bar */
-    RunningFoot,
+    RunningFoot = "running-foot",
 }
 
+export const ZoneIndex: Record<Zone, number> = Object.fromEntries(
+    Object.values(Zone).map((value, index) => [value, index])
+) as Record<Zone, number>;
+
 type Position = {
-    zone: keyof typeof Zone;
+    zone: Zone;
     order: number;
     anchor?: AnchorSpec;
 }
@@ -58,7 +62,7 @@ export type UISpec = {
 
 const SpecObj = z.object({
     position: z.object({
-        zone: z.literal(Object.keys(Zone).filter(k => isNaN(Number(k)))),
+        zone: z.literal(Object.values(Zone)),
         order: z.number(),
         anchor: z.optional(z.object({
             type: z.literal(Object.values(AnchorType)),
@@ -88,7 +92,7 @@ const SpecObj = z.object({
     ]),
 })
 
-export function isValidSpec(obj: any) {
+export function isValidSpec(obj: unknown): boolean {
     try {
         SpecObj.parse(obj);
     } catch(e) {

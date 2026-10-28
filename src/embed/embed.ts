@@ -1,5 +1,5 @@
 import { Component, FileView, View } from "obsidian";
-import { AnchorSpec, UISpec, Zone } from "../api/spec";
+import { AnchorSpec, UISpec, Zone, ZoneIndex } from "../api/spec";
 import { shouldInject } from "./condition";
 import { renderContent } from "./render";
 import { CLASS_BODY, CLASS_HEADER_FOOTER, CLASS_TOP_BOTTOM_BAR, setElAttr } from "../element";
@@ -11,7 +11,7 @@ export class Embed extends Component {
     private instances = new Set<WeakRef<HTMLElement>>();
     private recycler = new WeakMap<View, [HTMLElement, string | undefined]>();
 
-    get zone() { return Zone[this.spec.position.zone]; }
+    get zone() { return this.spec.position.zone; }
     get order() { return this.spec.position.order; }
 
     constructor(
@@ -98,6 +98,6 @@ export class Embed extends Component {
     compare(b: Embed) {
         return this.zone === b.zone
             ? this.order - b.order
-            : this.zone - b.zone;
+            : ZoneIndex[this.zone] - ZoneIndex[b.zone];
     }
 }
