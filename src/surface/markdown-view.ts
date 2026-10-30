@@ -4,7 +4,7 @@ import { injectMarkdownSubView, refreshMarkdownSubView } from "./markdown-sub-vi
 import { InjectFunction, RefreshFunction } from "../inject";
 
 export function isSourceMode(view: MarkdownView) {
-    return view.getState().source;
+    return view.getState?.().source;
 }
 
 export const injectMarkdownView: InjectFunction<MarkdownView> = function(
