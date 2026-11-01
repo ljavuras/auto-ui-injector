@@ -44,7 +44,7 @@ export enum AnchorType {
 export type AnchorSpec = {
     type: AnchorType.Raw,
     locateSourceOffset: (tree: Tree, state: EditorState) => number,
-    locatePreviewAnchorEl: (renderer: ReadViewRenderer) => HTMLElement,
+    locatePreviewRendererSection: (renderer: ReadViewRenderer) => number,
 }
 
 export type Condition = (view: View) => boolean

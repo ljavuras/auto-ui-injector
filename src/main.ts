@@ -13,6 +13,7 @@ import {
 import { AutoUIInjectorAPI } from './api/public';
 import { embedRegister } from './embed-register';
 import { patchMarkdownSubViews } from './surface/markdown-sub-view';
+import { patchMarkdownPreviewRenderer } from './surface/markdown-preview-renderer';
 import { Zone } from './api/spec';
 import { ejectAllOfZone, injectAllOfZone, refresh } from './inject';
 import { autoUIField, autoUIUpdateEffect } from './surface/codemirror';
@@ -44,6 +45,8 @@ export default class AutoUIInjector extends Plugin {
 				this.app.workspace.offref(ref);
 			})
 		}
+
+		this.register(patchMarkdownPreviewRenderer(this.app));
 
 		// Register event handlers
 		this.registerEvent(

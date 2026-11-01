@@ -16,9 +16,17 @@ function propertiesIsSource(app: App) {
 
 function injectEl(view: MarkdownView, zone: Zone, el: HTMLElement) {
     const anchorEl = ({
+        /**
+         * Preview: within div.mod-header.mod-ui (taken care by viewport as a whole)
+         * Source: under div.cm-sizer (children don't swap in/out during scroll)
+         */
         [Kicker]: view.inlineTitleEl,
         [Byline]: view.metadataEditor.containerEl,
         [Preface]: view.metadataEditor.containerEl,
+        /**
+         * Preview: within div.mod-footer.mod-ui (taken care by viewport as a whole)
+         * Source: under div.cm-sizer (children don't swap in/out during scroll)
+         */
         [Postscript]: view.backlinksEl,
         [EndMatter]: view.backlinksEl,
     } as Record<Zone, HTMLElement | undefined>)[zone];

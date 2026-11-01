@@ -20,8 +20,7 @@ class AutoUIWidget extends WidgetType {
     eq(other: AutoUIWidget) { return this.embed === other.embed; }
 
     toDOM(view: EditorView): HTMLElement {
-        const markdownView = view.state.field(editorInfoField) as MarkdownView;
-        return this.embed.render(markdownView);
+        return this.embed.render(view);
     }
 }
 
@@ -75,7 +74,7 @@ function buildAutoUIDecorationSet(state: EditorState) {
         .map((embed) => ({
             offset: (embed.zone === Preface || embed.zone === Afterword)
                 ? zoneOffset[embed.zone]
-                : embed.locate(tree, state),
+                : embed.locateOffset(tree, state),
             embed
         }))
         // Filter out results where user supplied locate function returns invalid result

@@ -1,4 +1,4 @@
-import { Component, FileView, View } from "obsidian";
+import { Component, editorInfoField, FileView, MarkdownView, View } from "obsidian";
 import { AnchorSpec, UISpec, Zone, ZoneIndex } from "../api/spec";
 import { shouldInject } from "./condition";
 import { renderContent } from "./render";
@@ -6,10 +6,12 @@ import { CLASS_BODY, CLASS_HEADER_FOOTER, CLASS_TOP_BOTTOM_BAR, setElAttr } from
 import type { Tree } from "@lezer/common";
 import { EditorState } from "@codemirror/state";
 import { locateOffset } from "./locate";
+import { ReadViewRenderer } from "@obsidian-typings/obsidian-public-latest";
+import { EditorView } from "@codemirror/view";
 
 export class Embed extends Component {
     private instances = new Set<WeakRef<HTMLElement>>();
-    private recycler = new WeakMap<View, [HTMLElement, string | undefined]>();
+    private recycler = new WeakMap<object, [HTMLElement, string | undefined]>();
 
     get zone() { return this.spec.position.zone; }
     get order() { return this.spec.position.order; }
@@ -24,16 +26,24 @@ export class Embed extends Component {
         return shouldInject(this.spec.condition, view);
     }
 
-    locate(tree: Tree, state: EditorState): number | undefined {
+    locateOffset(tree: Tree, state: EditorState): number | undefined {
         // Only embeds in document body need to call this function
         if (this.zone !== Zone.Body) return undefined;
 
         return locateOffset(this.spec.position.anchor as AnchorSpec, tree, state);
     }
 
-    render(view: View, force: boolean = false): HTMLElement {
+    locateSection(renderer: ReadViewRenderer): number | undefined {
+        return this.spec.position.anchor?.locatePreviewRendererSection(renderer);
+    }
+
+    render(v: View | EditorView, force: boolean = false): HTMLElement {
+        const view = v instanceof View
+            ? v
+            : v.state.field(editorInfoField) as MarkdownView;
+        if (!(view instanceof View)) return createDiv();
         let cls;
-        let [el, path] = this.recycler.get(view) || [];
+        let [el, path] = this.recycler.get(v) || [];
         if (!force && el) return el;
         el?.remove();
         switch (this.zone) {
@@ -59,7 +69,7 @@ export class Embed extends Component {
         renderContent(el, view, this.spec.content);
         this.instances.add(new WeakRef(el));
         path = view instanceof FileView? view.file?.path : undefined;
-        this.recycler.set(view, [el, path]);
+        this.recycler.set(v, [el, path]);
         return el;
     }
 
