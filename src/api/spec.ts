@@ -71,10 +71,10 @@ const SpecObj = z.object({
                 input: [z.any(), z.any()],
                 output: z.number()
             }),
-            locatePreviewAnchorEl: z.function({
+            locatePreviewRendererSection: z.function({
                 // input: [z.instanceof(ReadViewRenderer)],
                 input: [z.any()],
-                output: z.instanceof(HTMLElement)
+                output: z.number()
             }),
         }))
     }),

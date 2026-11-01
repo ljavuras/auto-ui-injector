@@ -8,6 +8,15 @@ const { Body, Afterword } = Zone;
 const zones = [Body, Afterword];
 let MarkdownPreviewSection: new (element: string | Node | null) => RendererSection;
 
+function filterInPlace(
+    array: Array<unknown>,
+    predicate: (value: unknown, index: number, array: Array<unknown>) => boolean
+) {
+    for(let i = array.length - 1; i >= 0; i--) {
+        if (!predicate(array[i], i, array)) array.splice(i, 1);
+    }
+}
+
 function injectSections(this: ReadViewRenderer) {
     if (!MarkdownPreviewSection) {
         MarkdownPreviewSection = this.sections[0]!.constructor as new (element: string | Node | null) => RendererSection;
@@ -16,30 +25,50 @@ function injectSections(this: ReadViewRenderer) {
     const view = this.owner.view  // MarkdownPreviewView
         ?? this.owner.owner;  // MarkdownEmbedView
 
+    // TODO: find the correct function to patch, `injectSections` should receive
+    // a clean array to patch
+    filterInPlace(this.sections, s => !s.isEmbed);
+
     embedRegister.values()
-        .filter(embed => zones.includes(embed.zone))
-        .forEach((embed) => {
-            const sectionIndex = embed.zone === Body
-                ? embed.locateSection(this)
-                : (embed.zone === Afterword
-                    ? this.sections.findLastIndex(s => !(
-                        s.el.hasClass("mod-footer")
-                        || s.el.firstElementChild?.hasClass("footnotes")
-                    ))
-                    : undefined
-                );
-            if (!(Number.isFinite(sectionIndex)
-                && sectionIndex as number > 0
-                && sectionIndex as number < this.sections.length
-            )) return;
+        .filter(embed => zones.includes(embed.zone) && embed.shouldInject(view))
+        .map((embed) => {
+            const anchorIndex = embed.zone === Afterword
+                ? this.sections.findLastIndex(s => !(
+                    s.el.hasClass("mod-footer")
+                    || s.html.startsWith(`<section class="footnotes">`)
+                ))
+                : (embed.zone === Body ? embed.locateSection(this) : undefined);
+            if (!(Number.isFinite(anchorIndex)
+                && anchorIndex as number > 0
+                && anchorIndex as number < this.sections.length
+            )) return null;
+
+            return {
+                anchorIndex,
+                embed,
+            };
+        })
+        .filter(e => !!e)
+        // Sort by anchorIndex and order
+        // If a Body embed lands on the same anchorIndex as Afterword, Afterword always goes after
+        // So all Afterword embeds clump up right before footnote, even when their order is negative
+        .sort((a, b) => {
+            if (a.anchorIndex !== b.anchorIndex)
+                return (a.anchorIndex as number) - (b.anchorIndex as number);
+            if (a.embed.zone === b.embed.zone)
+                return a.embed.order - b.embed.order;
+            return a.embed.zone === Afterword? 1 : -1;
+        })
+        .forEach(({ anchorIndex, embed }, index) => {
+            // Every prior insert pushes anchorIndex by 1
+            (anchorIndex as number) += index;
 
             const el = embed.render(view);
-            // TODO: patch method that modify this.sections, NOT before display
-            if (this.sections.some(s => s.el === el)) return;
-            const isBefore = embed.order < 0;
+            // Afterword always inserts before footnote (after last non-footnote)
+            const isBefore = embed.zone === Body? embed.order < 0 : false;
             const embedPos = isBefore
-                ? this.sections[sectionIndex].start
-                : this.sections[sectionIndex].end;
+                ? this.sections[anchorIndex].start
+                : this.sections[anchorIndex].end;
             const section = new MarkdownPreviewSection(null);
             Object.assign(section, {
                 rendered: true,
@@ -51,32 +80,29 @@ function injectSections(this: ReadViewRenderer) {
                 end: { line: 0, col: 0, offset: embedPos.offset },
                 isEmbed: true,
             });
-            // TODO: multiple sections anchored on same element
-            this.sections.splice(isBefore? sectionIndex : sectionIndex + 1, 0, section);
+            this.sections.splice(isBefore? anchorIndex : anchorIndex + 1, 0, section);
         })
 }
 
 export function patchMarkdownPreviewRenderer(app: App) {
     const unwrapMarkdownPreviewRenderer = around(
         MarkdownPreviewRenderer.prototype, {
-        updateVirtualDisplay(original) {
+        parseFinish(original) {
             return function(this: MarkdownPreviewRenderer, ...args) {
-                injectSections.call(this as unknown as ReadViewRenderer);
                 original.apply(this, args);
+                injectSections.call(this as unknown as ReadViewRenderer);
             }
         }
     });
+
+    // Clean up function
     return () => {
         unwrapMarkdownPreviewRenderer();
         app.workspace.getLeavesOfType('markdown').forEach(leaf => {
             const sections = (leaf.view as MarkdownView).previewMode?.renderer.sections;
             if (!sections) return;
             // Filter array in place in case someone required with its identity to be exact
-            for (let i = sections.length - 1; i >= 0; i--) {
-                if (sections[i].isEmbed) {
-                    sections.splice(i, 1);
-                }
-            }
+            filterInPlace(sections, s => !s.isEmbed)
         })
     }
 }

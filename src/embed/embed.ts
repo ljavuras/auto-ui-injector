@@ -40,7 +40,7 @@ export class Embed extends Component {
     render(v: View | EditorView, force: boolean = false): HTMLElement {
         const view = v instanceof View
             ? v
-            : v.state.field(editorInfoField) as MarkdownView;
+            : v.state?.field(editorInfoField) as MarkdownView;
         if (!(view instanceof View)) return createDiv();
         let cls;
         let [el, path] = this.recycler.get(v) || [];
