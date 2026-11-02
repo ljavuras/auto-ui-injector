@@ -9,8 +9,8 @@ import { embedRegister } from "../embed-register";
 import { SyntaxNode } from "@obsidian-typings/obsidian-public-latest";
 import { compareEmbed } from "../element";
 
-const { Preface, Body, Afterword } = Zone;
-const zones = [Preface, Body, Afterword];
+const { Preface, Body, Afterword, EOF } = Zone;
+const zones = [Preface, Body, Afterword, EOF];
 
 class AutoUIWidget extends WidgetType {
     constructor(private embed: Embed) {
@@ -54,30 +54,28 @@ function buildAutoUIDecorationSet(state: EditorState) {
         }
     }
 
-    const zoneOffset = {
+    const zoneOffset: Partial<Record<Zone, number>> = {
         [Preface]: frontmatterEndOffset,
-        [Body]: null,
         [Afterword]: footnoteStartOffset,
+        [EOF]: state.doc.length,
     };
 
     const builder = new RangeSetBuilder();
     embedRegister.values()
-        .filter(embed => zones.includes(embed.zone))
-        // Only show Preface in editor if frontmatters are displayed as source
-        .filter(embed => !(
-            embed.zone === Preface
-            // Filter out Preface if properties editor is visible, or properties
-            // are hidden.
-            && app.vault.config.propertiesInDocument !== "source"
-        ))
-        .filter(embed => embed.shouldInject(view))
+        .filter(embed => zones.includes(embed.zone)
+            // Only show Preface in editor if frontmatters are displayed as source
+            && !(embed.zone === Preface
+                && app.vault.config.propertiesInDocument !== "source"
+            )
+            && embed.shouldInject(view)
+        )
         .map((embed) => ({
-            offset: (embed.zone === Preface || embed.zone === Afterword)
-                ? zoneOffset[embed.zone]
-                : embed.locateOffset(tree, state),
-            embed
+            offset: embed.zone === Body
+                ? embed.locateOffset(tree, state)
+                : zoneOffset[embed.zone],
+            embed,
         }))
-        // Filter out results where user supplied locate function returns invalid result
+        // Validate user input
         .filter((e): e is {offset: number, embed: Embed} => typeof e.offset === "number"
             && Number.isFinite(e.offset)
             && e.offset >= 0
@@ -86,8 +84,8 @@ function buildAutoUIDecorationSet(state: EditorState) {
         // Ensure widgets are sorted according to their offset and zone
         .sort((a, b) => {
             return a.offset !== b.offset
-            ? a.offset - b.offset
-            : compareEmbed(a.embed, b.embed);
+                ? a.offset - b.offset
+                : compareEmbed(a.embed, b.embed);
         })
         // When widgets from different zones clash at the same offset, they
         // should order according to their zone and embed order

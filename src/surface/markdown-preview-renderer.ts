@@ -1,11 +1,11 @@
 import { App, MarkdownPreviewRenderer, MarkdownView } from "obsidian";
-import { Zone } from "../api/spec";
+import { compareZone, Zone } from "../api/spec";
 import { around } from "monkey-around";
 import { embedRegister } from "../embed-register";
 import { ReadViewRenderer, RendererSection } from "@obsidian-typings/obsidian-public-latest";
 
-const { Body, Afterword } = Zone;
-const zones = [Body, Afterword];
+const { Body, Afterword, EOF } = Zone;
+const zones = [Body, Afterword, EOF];
 let MarkdownPreviewSection: new (element: string | Node | null) => RendererSection;
 
 function filterInPlace(
@@ -29,15 +29,20 @@ function injectSections(this: ReadViewRenderer) {
     // a clean array to patch
     filterInPlace(this.sections, s => !s.isEmbed);
 
+    const sectionIndex: Partial<Record<Zone, number>> = {
+        [Afterword]: this.sections.findLastIndex(s => !(
+            s.el.hasClass("mod-footer")
+            || s.html.startsWith(`<section class="footnotes">`)
+        )),
+        [EOF]: this.sections.length - 2,
+    }
+
     embedRegister.values()
         .filter(embed => zones.includes(embed.zone) && embed.shouldInject(view))
         .map((embed) => {
-            const anchorIndex = embed.zone === Afterword
-                ? this.sections.findLastIndex(s => !(
-                    s.el.hasClass("mod-footer")
-                    || s.html.startsWith(`<section class="footnotes">`)
-                ))
-                : (embed.zone === Body ? embed.locateSection(this) : undefined);
+            const anchorIndex = embed.zone === Body
+                ? embed.locateSection(this)
+                : sectionIndex[embed.zone];
             if (!(typeof anchorIndex === "number"
                 && Number.isFinite(anchorIndex)
                 && anchorIndex > 0
@@ -50,15 +55,13 @@ function injectSections(this: ReadViewRenderer) {
             };
         })
         .filter(e => !!e)
-        // Sort by anchorIndex and order
-        // If a Body embed lands on the same anchorIndex as Afterword, Afterword always goes after
-        // So all Afterword embeds clump up right before footnote, even when their order is negative
+        // Sort by anchorIndex, zone and order, respectively
         .sort((a, b) => {
             if (a.anchorIndex !== b.anchorIndex)
-                return (a.anchorIndex as number) - (b.anchorIndex as number);
-            if (a.embed.zone === b.embed.zone)
-                return a.embed.order - b.embed.order;
-            return a.embed.zone === Afterword? 1 : -1;
+                return a.anchorIndex - b.anchorIndex;
+            if (a.embed.zone !== b.embed.zone)
+                return compareZone(a.embed.zone, b.embed.zone);
+            return a.embed.order - b.embed.order;
         })
         .forEach(({ anchorIndex, embed }, index) => {
             // Every prior insert pushes anchorIndex by 1

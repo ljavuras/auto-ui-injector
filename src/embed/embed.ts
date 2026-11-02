@@ -1,5 +1,5 @@
 import { Component, editorInfoField, FileView, MarkdownView, View } from "obsidian";
-import { AnchorSpec, UISpec, Zone, ZoneIndex } from "../api/spec";
+import { AnchorSpec, compareZone, UISpec, Zone } from "../api/spec";
 import { shouldInject } from "./condition";
 import { renderContent } from "./render";
 import { CLASS_BODY, CLASS_HEADER_FOOTER, CLASS_TOP_BOTTOM_BAR, setElAttr } from "../element";
@@ -108,6 +108,6 @@ export class Embed extends Component {
     compare(b: Embed) {
         return this.zone === b.zone
             ? this.order - b.order
-            : ZoneIndex[this.zone] - ZoneIndex[b.zone];
+            : compareZone(this.zone, b.zone);
     }
 }

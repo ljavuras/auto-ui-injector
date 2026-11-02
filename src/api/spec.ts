@@ -19,6 +19,7 @@ export enum Zone {
     Body = "body",
     Afterword = "afterword",
     // Footnotes
+    EOF = "eof",
     Postscript = "postscript",
     // Backlinks
     EndMatter = "end-matter",
@@ -27,9 +28,13 @@ export enum Zone {
     RunningFoot = "running-foot",
 }
 
-export const ZoneIndex: Record<Zone, number> = Object.fromEntries(
+const ZoneIndex: Record<Zone, number> = Object.fromEntries(
     Object.values(Zone).map((value, index) => [value, index])
 ) as Record<Zone, number>;
+
+export function compareZone(a: Zone, b: Zone): number {
+    return ZoneIndex[a] - ZoneIndex[b];
+}
 
 type Position = {
     zone: Zone;
@@ -41,11 +46,13 @@ export enum AnchorType {
     Raw = "raw",
 }
 
-export type AnchorSpec = {
+interface RawAnchorSpec {
     type: AnchorType.Raw,
     locateSourceOffset: (tree: Tree, state: EditorState) => number,
     locatePreviewRendererSection: (renderer: ReadViewRenderer) => number,
-}
+};
+
+export type AnchorSpec = RawAnchorSpec;
 
 export type Condition = (view: View) => boolean
 

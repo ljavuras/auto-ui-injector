@@ -17,14 +17,11 @@ export class AutoUIInjectorAPI {
         if (embedRegister.add(spec)) {
             const embed = embedRegister.get(spec);
             if (!embed) return;
-            const cmUpdate = embed.zone === Zone.Body;
             this.app.workspace.iterateAllLeaves((leaf: WorkspaceLeaf) => {
                 inject(leaf.view, embed);
-                if (cmUpdate) {
-                    (leaf.view as MarkdownView).editMode?.editor?.cm.dispatch({
-                        effects: autoUIUpdateEffect.of(null)
-                    });
-                }
+                (leaf.view as MarkdownView).editMode?.editor?.cm.dispatch({
+                    effects: autoUIUpdateEffect.of(null)
+                });
                 (leaf.view as MarkdownView).previewMode?.rerender();
             });
         }
