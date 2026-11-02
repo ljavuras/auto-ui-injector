@@ -25,6 +25,7 @@ export class AutoUIInjectorAPI {
                         effects: autoUIUpdateEffect.of(null)
                     });
                 }
+                (leaf.view as MarkdownView).previewMode?.rerender();
             });
         }
     }
