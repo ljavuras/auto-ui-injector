@@ -38,9 +38,10 @@ function injectSections(this: ReadViewRenderer) {
                     || s.html.startsWith(`<section class="footnotes">`)
                 ))
                 : (embed.zone === Body ? embed.locateSection(this) : undefined);
-            if (!(Number.isFinite(anchorIndex)
-                && anchorIndex as number > 0
-                && anchorIndex as number < this.sections.length
+            if (!(typeof anchorIndex === "number"
+                && Number.isFinite(anchorIndex)
+                && anchorIndex > 0
+                && anchorIndex < this.sections.length
             )) return null;
 
             return {

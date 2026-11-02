@@ -78,7 +78,11 @@ function buildAutoUIDecorationSet(state: EditorState) {
             embed
         }))
         // Filter out results where user supplied locate function returns invalid result
-        .filter((e): e is {offset: number, embed: Embed} => e.offset !== undefined)
+        .filter((e): e is {offset: number, embed: Embed} => typeof e.offset === "number"
+            && Number.isFinite(e.offset)
+            && e.offset >= 0
+            && e.offset <= state.doc.length
+        )
         // Ensure widgets are sorted according to their offset and zone
         .sort((a, b) => {
             return a.offset !== b.offset
