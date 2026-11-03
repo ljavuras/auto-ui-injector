@@ -1,11 +1,11 @@
 import { Component, editorInfoField, FileView, MarkdownView, View } from "obsidian";
-import { AnchorSpec, compareZone, UISpec, Zone } from "../api/spec";
+import { compareZone, UISpec, Zone } from "../api/spec";
 import { shouldInject } from "./condition";
 import { renderContent } from "./render";
 import { CLASS_BODY, CLASS_HEADER_FOOTER, CLASS_TOP_BOTTOM_BAR, setElAttr } from "../element";
 import type { Tree } from "@lezer/common";
 import { EditorState } from "@codemirror/state";
-import { locateOffset } from "./locate";
+import { locateOffset, locateSection } from "./locate";
 import { ReadViewRenderer } from "@obsidian-typings/obsidian-public-latest";
 import { EditorView } from "@codemirror/view";
 
@@ -27,14 +27,15 @@ export class Embed extends Component {
     }
 
     locateOffset(tree: Tree, state: EditorState): number | undefined {
-        // Only embeds in document body need to call this function
-        if (this.zone !== Zone.Body) return undefined;
-
-        return locateOffset(this.spec.position.anchor as AnchorSpec, tree, state);
+        const { zone, anchor } = this.spec.position;
+        if (zone !== Zone.Body) return undefined;
+        return locateOffset(anchor, tree, state);
     }
 
     locateSection(renderer: ReadViewRenderer): number | undefined {
-        return this.spec.position.anchor?.locatePreviewRendererSection(renderer);
+        const { zone, anchor } = this.spec.position;
+        if (zone !== Zone.Body) return undefined;
+        return locateSection(anchor, renderer);
     }
 
     render(v: View | EditorView, force: boolean = false): HTMLElement {

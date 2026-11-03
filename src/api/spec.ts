@@ -36,23 +36,41 @@ export function compareZone(a: Zone, b: Zone): number {
     return ZoneIndex[a] - ZoneIndex[b];
 }
 
-type Position = {
-    zone: Zone;
-    order: number;
-    anchor?: AnchorSpec;
-}
-
 export enum AnchorType {
     Raw = "raw",
+    Section = "section",
 }
 
-interface RawAnchorSpec {
+export interface RawAnchorSpec {
     type: AnchorType.Raw,
     locateSourceOffset: (tree: Tree, state: EditorState) => number,
     locatePreviewRendererSection: (renderer: ReadViewRenderer) => number,
 };
 
-export type AnchorSpec = RawAnchorSpec;
+export interface SectionAnchorSpec {
+    type: AnchorType.Section,
+    match: {
+        text?: string,
+        startsWith?: string,
+        endsWith?: string,
+        includes?: string,
+        regex?: RegExp,
+        level?: 1 | 2 | 3 | 4 | 5 | 6,
+    },
+    occurrence?: number,  // Omitting results in first match
+    // pick: "heading" | "content" | "section",
+}
+
+export type AnchorSpec = RawAnchorSpec | SectionAnchorSpec;
+
+type Position = {
+    zone: Exclude<Zone, Zone.Body>,
+    order: number,
+} | {
+    zone: Zone.Body,
+    order: number,
+    anchor: AnchorSpec,
+};
 
 export type Condition = (view: View) => boolean
 
@@ -71,19 +89,36 @@ const SpecObj = z.object({
     position: z.object({
         zone: z.literal(Object.values(Zone)),
         order: z.number(),
-        anchor: z.optional(z.object({
-            type: z.literal(Object.values(AnchorType)),
-            locateSourceOffset: z.function({
-                // input: [z.instanceof(Tree), z.instanceof(EditorState)],
-                input: [z.any(), z.any()],
-                output: z.number()
-            }),
-            locatePreviewRendererSection: z.function({
-                // input: [z.instanceof(ReadViewRenderer)],
-                input: [z.any()],
-                output: z.number()
-            }),
-        }))
+        anchor: z.optional(
+            z.union([
+                z.object({
+                    type: z.literal(AnchorType.Raw),
+                    locateSourceOffset: z.function({
+                        // input: [z.instanceof(Tree), z.instanceof(EditorState)],
+                        input: [z.any(), z.any()],
+                        output: z.number()
+                    }),
+                    locatePreviewRendererSection: z.function({
+                        // input: [z.instanceof(ReadViewRenderer)],
+                        input: [z.any()],
+                        output: z.number()
+                    }),
+                }),
+                z.object({
+                    type: z.literal(AnchorType.Section),
+                    match: z.object({
+                        text: z.optional(z.string()),
+                        startsWith: z.optional(z.string()),
+                        endsWith: z.optional(z.string()),
+                        includes: z.optional(z.string()),
+                        regex: z.optional(z.instanceof(RegExp)),
+                        level: z.optional(z.int().gt(0).lt(7)),
+                    }),
+                    occurrence: z.optional(z.int().gt(0)),
+                    // type:
+                })
+            ])
+        )
     }),
     condition: z.function({
         input: [z.instanceof(View)],
