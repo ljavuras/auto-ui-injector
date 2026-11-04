@@ -107,7 +107,7 @@ export default class AutoUIInjector extends Plugin {
 			if (this.app.vault.config.propertiesInDocument === "source") {
 				ejectAllOfZone(Zone.Preface);
 			} else {
-				injectAllOfZone(Zone.Preface);
+				injectAllOfZone(Zone.Preface, this.app);
 			}
 			this.app.workspace.getLeavesOfType('markdown').forEach(leaf => {
 				(leaf.view as MarkdownView).editMode?.editor?.cm.dispatch({

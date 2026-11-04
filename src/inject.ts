@@ -1,4 +1,4 @@
-import { ItemView, MarkdownView, View } from "obsidian";
+import { App, ItemView, MarkdownView, View } from "obsidian";
 import { Embed } from "./embed/embed";
 import { injectView, isVisible } from "./surface/view";
 import { injectItemView } from "./surface/item-view";
@@ -41,7 +41,7 @@ export function refresh(view: View) {
     })
 }
 
-export function injectAllOfZone(zone: Zone | undefined) {
+export function injectAllOfZone(zone: Zone | undefined, app: App) {
     embedRegister.values()
         .filter(e => zone === undefined || e.zone === zone)
         .forEach(e => {

@@ -25,9 +25,11 @@ export function locateOffset(
             enter(node) {
                 if (occurrence === 0) return;
                 if (!/^header_header-\d$/.test(node.name)) return;
+
                 const { from, to } = node;
                 const text = state.doc.sliceString(from, to);
                 const match = anchor.match;
+
                 if (isString(match.text) && text !== match.text) return;
                 if (isString(match.startsWith)
                     && !text.startsWith(match.startsWith)) return;
@@ -40,6 +42,7 @@ export function locateOffset(
                 if (Number.isInteger(match.level)
                     && match.level! > 0 && match.level! < 7
                     && node.name !== `header_header-${match.level}`) return;
+
                 offset = to;
                 occurrence--;
             }

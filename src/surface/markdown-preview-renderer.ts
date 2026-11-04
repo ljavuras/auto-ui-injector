@@ -65,7 +65,7 @@ function injectSections(this: ReadViewRenderer) {
         })
         .forEach(({ anchorIndex, embed }, index) => {
             // Every prior insert pushes anchorIndex by 1
-            (anchorIndex as number) += index;
+            anchorIndex += index;
 
             const el = embed.render(view);
             // Afterword always inserts before footnote (after last non-footnote)
