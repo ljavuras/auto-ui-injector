@@ -63,20 +63,6 @@ export function injectMarkdownSubView(
     injectEl(view, embed.zone, el);
 }
 
-export function refreshMarkdownSubView(subView: MarkdownEditView | MarkdownPreviewView) {
-    if (subView.type === "source" && isSourceMode(subView)) return;
-
-    const view = subView.view;
-    embedRegister.values()
-        .filter(e => zones.includes(e.zone))
-        .filter(e => !propertiesIsSource(subView.app) || e.zone !== Preface)
-        .filter(e => e.shouldInject(subView.view))
-        .forEach(embed => {
-            const el = embed.rerender(view);
-            if (el) injectEl(view, embed.zone, el);
-        });
-}
-
 function show(this: MarkdownEditView | MarkdownPreviewView) {
     const embeds = embedRegister.values()
         .filter(e => zones.includes(e.zone))

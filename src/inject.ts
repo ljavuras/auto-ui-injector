@@ -1,24 +1,17 @@
 import { ItemView, MarkdownView, View } from "obsidian";
 import { Embed } from "./embed/embed";
-import { injectView, isVisible, refreshView } from "./surface/view";
-import { injectItemView, refreshItemView } from "./surface/item-view";
-import { injectMarkdownView, refreshMarkdownView } from "./surface/markdown-view";
+import { injectView, isVisible } from "./surface/view";
+import { injectItemView } from "./surface/item-view";
+import { injectMarkdownView } from "./surface/markdown-view";
 import { Zone } from "./api/spec";
 import { embedRegister } from "./embed-register";
 
 export type InjectFunction<T extends View> = (view: T, embed: Embed) => void;
-export type RefreshFunction<T extends View> = (view: T) => void;
 
 const injectors = new Map<typeof View, InjectFunction<any>>([
     [View, injectView],
     [ItemView, injectItemView],
     [MarkdownView, injectMarkdownView],
-]);
-
-const refreshers = new Map<typeof View, RefreshFunction<any>>([
-    [View, refreshView],
-    [ItemView, refreshItemView],
-    [MarkdownView, refreshMarkdownView],
 ]);
 
 /**
@@ -39,11 +32,13 @@ export function inject(view: View, embed: Embed): void {
 
 export function refresh(view: View) {
     if (!isVisible(view)) return;
-    for (const [Type, refresher] of refreshers) {
-        if (view instanceof Type) {
-            refresher(view);
+    embedRegister.values().forEach(embed => {
+        embed.removeFromView(view);
+        if (!embed.shouldInject(view)) return;
+        for (const [Type, injector] of injectors) {
+            if (view instanceof Type) injector(view, embed);
         }
-    }
+    })
 }
 
 export function injectAllOfZone(zone: Zone | undefined) {

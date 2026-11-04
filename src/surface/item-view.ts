@@ -2,9 +2,7 @@ import { ItemView, MarkdownEditView, MarkdownPreviewView, MarkdownView } from "o
 import { Embed } from "../embed/embed";
 import { insertLookBefore, insertLookAfter } from "../element";
 import { Zone } from "../api/spec";
-import type { InjectFunction, RefreshFunction } from "../inject";
-import { isSourceMode } from "./markdown-view";
-import { embedRegister } from "../embed-register";
+import type { InjectFunction } from "../inject";
 
 const { RunningHead, Eyebrow, RunningFoot } = Zone;
 const zones = [RunningHead, Eyebrow, RunningFoot];
@@ -35,20 +33,4 @@ export const injectItemView: InjectFunction<ItemView> = function(
 
     const el = embed.render(view);
     injectEl(view, embed.zone, el);
-}
-
-export const refreshItemView: RefreshFunction<ItemView> = function(view: ItemView) {
-    // No embeds are visible in source mode
-    if (view instanceof MarkdownView && isSourceMode(view)) return;
-
-    const embeds = embedRegister.values()
-        .filter(embed => zones.includes(embed.zone));
-    embeds.forEach(embed => {
-        if (!embed.shouldInject(view)) {
-            embed.removeFromView(view);
-            return;
-        }
-        const el = embed.rerender(view);
-        if (el) injectEl(view, embed.zone, el);
-    })
 }

@@ -38,7 +38,7 @@ export class Embed extends Component {
         return locateSection(anchor, renderer);
     }
 
-    render(v: View | EditorView, force: boolean = false): HTMLElement {
+    render(v: View | EditorView): HTMLElement {
         const view = v instanceof View
             ? v
             : v.state?.field(editorInfoField) as MarkdownView;
@@ -46,7 +46,7 @@ export class Embed extends Component {
         const currentPath = view instanceof FileView ? view.file?.path : undefined;
         let cls;
         let [el, path] = this.recycler.get(v) || [];
-        if (!force && el && path === currentPath) return el;
+        if (el && path === currentPath) return el;
         el?.remove();
         switch (this.zone) {
             case Zone.RunningHead:
@@ -72,22 +72,6 @@ export class Embed extends Component {
         this.instances.add(new WeakRef(el));
         this.recycler.set(v, [el, currentPath]);
         return el;
-    }
-
-    /**
-     * Returns el if it's a new render, else directly replace old embed with
-     * new embed and return null.
-     */
-    rerender(view: View): HTMLElement | null {
-        const [oldEl, oldPath] = this.recycler.get(view) || [];
-        if (!oldEl) return this.render(view);  // New render
-
-        // No path change, skip render
-        if (view instanceof FileView && oldPath === view.file?.path) return null;
-    
-        const newEl = this.render(view, true);
-        oldEl.replaceWith(newEl);
-        return null;
     }
 
     removeFromView(view: View) {
