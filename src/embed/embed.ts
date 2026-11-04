@@ -43,9 +43,10 @@ export class Embed extends Component {
             ? v
             : v.state?.field(editorInfoField) as MarkdownView;
         if (!(view instanceof View)) return createDiv();
+        const currentPath = view instanceof FileView ? view.file?.path : undefined;
         let cls;
         let [el, path] = this.recycler.get(v) || [];
-        if (!force && el) return el;
+        if (!force && el && path === currentPath) return el;
         el?.remove();
         switch (this.zone) {
             case Zone.RunningHead:
@@ -69,8 +70,7 @@ export class Embed extends Component {
         setElAttr(el, this);
         renderContent(el, view, this.spec.content);
         this.instances.add(new WeakRef(el));
-        path = view instanceof FileView? view.file?.path : undefined;
-        this.recycler.set(v, [el, path]);
+        this.recycler.set(v, [el, currentPath]);
         return el;
     }
 

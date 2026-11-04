@@ -86,8 +86,13 @@ export default class AutoUIInjector extends Plugin {
 	 */
 	onFileOpen(file: TFile) {
 		this.app.workspace.iterateAllLeaves((leaf) => {
-			if (leaf.view instanceof FileView && leaf.view.file === file) {
-				refresh(leaf.view);
+			if ((leaf.view as FileView)?.file === file) {
+				if (leaf.view instanceof FileView) refresh(leaf.view);
+				if (leaf.view instanceof MarkdownView) {
+					leaf.view.editMode?.editor?.cm.dispatch({
+						effects: autoUIUpdateEffect.of(null)
+					});
+				}
 			}
 		});
 	}

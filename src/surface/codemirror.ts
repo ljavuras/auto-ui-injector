@@ -13,11 +13,16 @@ const { Preface, Body, Afterword, EOF } = Zone;
 const zones = [Preface, Body, Afterword, EOF];
 
 class AutoUIWidget extends WidgetType {
-    constructor(private embed: Embed) {
+    constructor(
+        private embed: Embed,
+        private path: string | undefined,
+    ) {
         super();
     }
 
-    eq(other: AutoUIWidget) { return this.embed === other.embed; }
+    eq(other: AutoUIWidget) {
+        return this.embed === other.embed && this.path === other.path;
+    }
 
     toDOM(view: EditorView): HTMLElement {
         return this.embed.render(view);
@@ -91,6 +96,7 @@ function buildAutoUIDecorationSet(state: EditorState) {
         // should order according to their zone and embed order
         .map ((e, index, array) => ({
             embed: e.embed,
+            path: view.file?.path,
             offset: e.offset,
             side: index + 1,
             // side: e.embed.order >= 0
@@ -101,7 +107,7 @@ function buildAutoUIDecorationSet(state: EditorState) {
             e.offset,
             e.offset,
             Decoration.widget({
-                widget: new AutoUIWidget(e.embed),
+                widget: new AutoUIWidget(e.embed, e.path),
                 side: e.side,
                 block: true,
             })
