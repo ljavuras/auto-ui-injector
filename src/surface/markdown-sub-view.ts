@@ -5,6 +5,7 @@ import { insertLookAfter, insertLookBefore } from "../element";
 import { embedRegister } from "../embed-register";
 import { around } from "monkey-around"
 import { ejectAllOfView, injectZonesOfView } from "../inject";
+import { autoUIUpdateEffect } from "./codemirror";
 
 const { RunningHead, Eyebrow, RunningFoot } = Zone;
 const { Kicker, Byline, Preface, Postscript, EndMatter } = Zone;
@@ -113,6 +114,9 @@ export function patchMarkdownSubViews(markdownEditView: typeof MarkdownEditView)
                 } else {
                     injectZonesOfView(this.view);
                 }
+                this.editor?.cm.dispatch({
+                    effects: autoUIUpdateEffect.of(null)
+                });
             }
         },
     });
