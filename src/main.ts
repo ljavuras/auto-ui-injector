@@ -24,7 +24,7 @@ export default class AutoUIInjector extends Plugin {
 
 	async onload() {
 		await this.loadSettings();
-		this.addSettingTab(new SettingTab(this.app, this));
+		// this.addSettingTab(new SettingTab(this.app, this));
 		this.api = new AutoUIInjectorAPI(this.app);
 
 		// Monkey patch MarkdownEditView
