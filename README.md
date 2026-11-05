@@ -36,9 +36,9 @@ Auto UI Injector at its current state is primarily intended for Obsidian users c
 The plugin exposes its API through:
 
 ```js
-const api = app.plugins.getPlugins('auto-ui-injector').api
-api.registerAutoUI(spec);  // Register an UI to be injected
-api.unregisterAutoUI(spec);  // Unregister an UI
+const api = app.plugins.getPlugins('auto-ui-injector')?.api
+api?.registerAutoUI(spec);  // Register an UI to be injected
+api?.unregisterAutoUI(spec);  // Unregister an UI
 ```
 
 The API revolves around UI specifications (`UISpec`). Each specification defines:
@@ -54,153 +54,153 @@ You can use it with any scripting plugin you prefer, such as CustomJS or CodeScr
 // Define and registers UI, re-registers when the plugin is re-enabled.
 
 class AutoUIInjectExample {
-	constructor() {
-		registerAutoUIs();
-		// Register when Auto UI Injector is enabled.
-		// Repeated registeration is safe, as long as the `UISpec` passed into
-		// it is the same object.
-		this.pluginChangedEventRef = app.plugins.on('changed', () => {
-			registerAutoUIs();
-		});
-	}
+    constructor() {
+        registerAutoUIs();
+        // Register when Auto UI Injector is enabled.
+        // Repeated registeration is safe, as long as the `UISpec` passed into
+        // it is the same object.
+        this.pluginChangedEventRef = app.plugins.on('changed', () => {
+            registerAutoUIs();
+        });
+    }
 
-	deconstructor() {
-		unregisterAutoUIs();
-		app.plugins.offref(this.pluginChangedEventRef);
-	}
-	
-	registerAutoUIs() {
-		const api = app.plugins.getPlugin("auto-ui-injector")?.api;
-		if (!api) return;
-		this.autoUIs.forEach((spec) => api.registerAutoUI(spec));
-	}
+    deconstructor() {
+        unregisterAutoUIs();
+        app.plugins.offref(this.pluginChangedEventRef);
+    }
+    
+    registerAutoUIs() {
+        const api = app.plugins.getPlugin("auto-ui-injector")?.api;
+        if (!api) return;
+        this.autoUIs.forEach((spec) => api.registerAutoUI(spec));
+    }
 
-	unregisterAutoUIs() {
-		const api = app.plugins.getPlugins("auto-ui-injector")?.api;
-		if (!api) return;
-		this.autoUIs.forEach((spec) => api.unregisterAutoUI(spec));
-	}
+    unregisterAutoUIs() {
+        const api = app.plugins.getPlugins("auto-ui-injector")?.api;
+        if (!api) return;
+        this.autoUIs.forEach((spec) => api.unregisterAutoUI(spec));
+    }
 
-	autoUIs = [
-		// Add Datacore code block to all notes under "path/to/daily/notes/"
-		{
-			// Available zones includes: "running-head", "eyebrow", "kicker",
-			// "byline", "preface", "body", "afterword", "eof", "postscript",
-			// "end-matter", "running-foot"
-			// `order` sorts Auto UIs when multiple are placed in the same zone
-			position: { zone: "eyebrow", order: 10 },
-			condition: (view) => view instanceof obsidian.MarkdownView
-				&& view.file?.path.startsWith("path/to/daily/notes/"),
-			content: "```datacorejsx\n" +
+    autoUIs = [
+        // Add Datacore code block to all notes under "path/to/daily/notes/"
+        {
+            // Available zones includes: "running-head", "eyebrow", "kicker",
+            // "byline", "preface", "body", "afterword", "eof", "postscript",
+            // "end-matter", "running-foot"
+            // `order` sorts Auto UIs when multiple are placed in the same zone
+            position: { zone: "eyebrow", order: 10 },
+            condition: (view) => view instanceof obsidian.MarkdownView
+                && view.file?.path.startsWith("path/to/daily/notes/"),
+            content: "```datacorejsx\n" +
                     `const { DailyNavigation } = await dc.require("path/to/script");
                     return <DailyNavigation />` +
                     "\n```",
-		},
-		// Render Datacore component with JavaScript in notes tagged #note/entry
-		{
-			position: { zone: "eof", order: 10},
-			condition: (view) => {
-				if (!(view instanceof obsidian.MarkdownView)) return;
-				const path = view.file?.path;
-				const cache = app.metadataCache.getCache(path);
-				const tags = obsidian.getAllTags(cache);
-				return tags.some(tag => /^#note\/entry($|\/)/.test(tag));
-			},
-			content: (el, view) => datacore.executeJsx(
-				`const { EntryFeed } = await dc.require("path/to/script");
-				return <EntryFeed parentPath={dc.currentPath()} />`,
-				el,
-				view,
-				view.path
-			),
-		},
-		// Render Markdown under first H1 heading in every Markdown note
-		{
-			position: {
-				zone: "body",
-				order: 10,
-				// Auto UIs in zone Body has to provide an anchor to describe
-				// where in the document body should it inject.
-				anchor: {
-					type: "section",  // Target headers
-					match: {
-						level: 1  // Target H1 headings
-						// Other matching methods:
-						// text: "Exact text",
-						// startsWith: "Title prefix",
-						// endsWith: "Title suffix",
-						// includes: "Title substring",
-						// regex: /Matching regex/,
-						// All conditions have to satisify to match a heading
-					},
-					// occurrence: 1,  // Omit occurrence results in first match
-				}
-			},
-			// Auto UI Injector will inject into every view (calendar, explorer,
-			// graph view) if not limited to MarkdownView
-			condition: (view) => view instanceof obsidian.MarkdownView,
-			// See https://docs.obsidian.md/Reference/TypeScript+API/MarkdownRenderer/render
-			content: (el, view) => obsidian.MarkdownRenderer.render(
-				view.app,
-				`${view.file?.path}`,  // Markdown text
-				el,
-				view.file?.path ?? "",
-				view,
-			),
-		},
-		// Position Auto UI within document body with JavaScript
-		{
-			position: {
-				zone: "body",
-				order: 10,
-				match: {
-					// Match first H2 with exact text "Task"
-					// type: "section"
-					// match: {
-					// 	   level: 2,
-					// 	   text: "Task",
-					// }
+        },
+        // Render Datacore component with JavaScript in notes tagged #note/entry
+        {
+            position: { zone: "eof", order: 10},
+            condition: (view) => {
+                if (!(view instanceof obsidian.MarkdownView)) return;
+                const path = view.file?.path;
+                const cache = app.metadataCache.getCache(path);
+                const tags = obsidian.getAllTags(cache);
+                return tags.some(tag => /^#note\/entry($|\/)/.test(tag));
+            },
+            content: (el, view) => datacore.executeJsx(
+                `const { EntryFeed } = await dc.require("path/to/script");
+                return <EntryFeed parentPath={dc.currentPath()} />`,
+                el,
+                view,
+                view.path
+            ),
+        },
+        // Render Markdown under first H1 heading in every Markdown note
+        {
+            position: {
+                zone: "body",
+                order: 10,
+                // Auto UIs in zone Body has to provide an anchor to describe
+                // where in the document body should it inject.
+                anchor: {
+                    type: "section",  // Target headers
+                    match: {
+                        level: 1  // Target H1 headings
+                        // Other matching methods:
+                        // text: "Exact text",
+                        // startsWith: "Title prefix",
+                        // endsWith: "Title suffix",
+                        // includes: "Title substring",
+                        // regex: /Matching regex/,
+                        // All conditions have to satisify to match a heading
+                    },
+                    // occurrence: 1,  // Omit occurrence results in first match
+                }
+            },
+            // Auto UI Injector will inject into every view (calendar, explorer,
+            // graph view) if not limited to MarkdownView
+            condition: (view) => view instanceof obsidian.MarkdownView,
+            // See https://docs.obsidian.md/Reference/TypeScript+API/MarkdownRenderer/render
+            content: (el, view) => obsidian.MarkdownRenderer.render(
+                view.app,
+                `${view.file?.path}`,  // Markdown text
+                el,
+                view.file?.path ?? "",
+                view,
+            ),
+        },
+        // Position Auto UI within document body with JavaScript
+        {
+            position: {
+                zone: "body",
+                order: 10,
+                match: {
+                    // Match first H2 with exact text "Task"
+                    // type: "section"
+                    // match: {
+                    // 	   level: 2,
+                    // 	   text: "Task",
+                    // }
 
-					// Same matching condition, but with JavaScript
-					type: "raw",
-					// tree: https://lezer.codemirror.net/docs/ref/#common.Tree
-					// state: https://codemirror.net/docs/ref/#state.EditorState
-					locateSourceOffset: (tree, state) => {
-						let offset;
-						tree.iterate({
-							enter(node) {
-								if (offset !== undefined) return;
-								if (node.name !== "header_header-2") return;
-								const { from, to } = node;
-								if (state.doc.sliceString(from, to) !== "Task")
-									return;
-								offset = to;
-							}
-						});
-						return offset;
-					},
-					// renderer: https://docs.obsidian.md/Reference/TypeScript+API/MarkdownPreviewRenderer
-					// Try console.log to reveal more information
-					locatePreviewRendererSection: (renderer) => {
-						return renderer.sections.find(s => {
-							if (s.level !== 2) return false;
-							const text = renderer.text.slice(
-								s.start.offset + 3,
-								s.end.offset
-							);
-							return text === "Task";
-						})
-					},
-				}
-			},
-			condition: (view) => view instanceof obsidian.MarkdownView
-				&& view.file?.path.startsWith("path/to/daily/notes/"),
-			content: "```datacorejsx\n" +
+                    // Same matching condition, but with JavaScript
+                    type: "raw",
+                    // tree: https://lezer.codemirror.net/docs/ref/#common.Tree
+                    // state: https://codemirror.net/docs/ref/#state.EditorState
+                    locateSourceOffset: (tree, state) => {
+                        let offset;
+                        tree.iterate({
+                            enter(node) {
+                                if (offset !== undefined) return;
+                                if (node.name !== "header_header-2") return;
+                                const { from, to } = node;
+                                if (state.doc.sliceString(from, to) !== "Task")
+                                    return;
+                                offset = to;
+                            }
+                        });
+                        return offset;
+                    },
+                    // renderer: https://docs.obsidian.md/Reference/TypeScript+API/MarkdownPreviewRenderer
+                    // Try console.log to reveal more information
+                    locatePreviewRendererSection: (renderer) => {
+                        return renderer.sections.find(s => {
+                            if (s.level !== 2) return false;
+                            const text = renderer.text.slice(
+                                s.start.offset + 3,
+                                s.end.offset
+                            );
+                            return text === "Task";
+                        })
+                    },
+                }
+            },
+            condition: (view) => view instanceof obsidian.MarkdownView
+                && view.file?.path.startsWith("path/to/daily/notes/"),
+            content: "```datacorejsx\n" +
                     `const { DayTask } = await dc.require("path/to/script");
                     return <DayTask />` +
                     "\n```",
-		},
-	]
+        },
+    ]
 }
 ```
 
