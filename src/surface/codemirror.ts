@@ -61,7 +61,7 @@ function buildAutoUIDecorationSet(state: EditorState) {
 
     const zoneOffset: Partial<Record<Zone, number>> = {
         [Preface]: frontmatterEndOffset,
-        [Afterword]: footnoteStartOffset,
+        [Afterword]: footnoteStartOffset - 1,
         [EOF]: state.doc.length,
     };
 
