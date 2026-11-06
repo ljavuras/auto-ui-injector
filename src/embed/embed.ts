@@ -1,12 +1,11 @@
-import { Component, editorInfoField, FileView, MarkdownView, View } from "obsidian";
-import { compareZone, UISpec, Zone } from "../api/spec";
+import { Component, editorInfoField, FileView, MarkdownPreviewRenderer, MarkdownView, View } from "obsidian";
+import { BodyPosition, compareZone, UISpec, Zone } from "../api/spec";
 import { shouldInject } from "./condition";
 import { renderContent } from "./render";
 import { CLASS_BODY, CLASS_HEADER_FOOTER, CLASS_TOP_BOTTOM_BAR, setElAttr } from "../element";
 import type { Tree } from "@lezer/common";
 import { EditorState } from "@codemirror/state";
 import { locateOffset, locateSection } from "./locate";
-import { ReadViewRenderer } from "@obsidian-typings/obsidian-public-latest";
 import { EditorView } from "@codemirror/view";
 
 export class Embed extends Component {
@@ -27,13 +26,13 @@ export class Embed extends Component {
     }
 
     locateOffset(tree: Tree, state: EditorState): number | undefined {
-        const { zone, anchor } = this.spec.position;
+        const { zone, anchor } = (this.spec.position as BodyPosition);
         if (zone !== Zone.Body) return undefined;
         return locateOffset(anchor, tree, state);
     }
 
-    locateSection(renderer: ReadViewRenderer): number | undefined {
-        const { zone, anchor } = this.spec.position;
+    locateSection(renderer: MarkdownPreviewRenderer): number | undefined {
+        const { zone, anchor } = (this.spec.position as BodyPosition);
         if (zone !== Zone.Body) return undefined;
         return locateSection(anchor, renderer);
     }

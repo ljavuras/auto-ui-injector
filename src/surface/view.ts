@@ -1,4 +1,4 @@
-import { ItemView, MarkdownView, View } from "obsidian";
+import { ItemView, View } from "obsidian";
 import { Zone } from "../api/spec";
 import { Embed } from "../embed/embed";
 import { insertLookBefore, insertLookAfter } from "../element";

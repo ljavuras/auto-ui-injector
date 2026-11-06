@@ -5,11 +5,6 @@ import {
 	Plugin,
 	TFile,
 } from 'obsidian';
-import {
-	DEFAULT_SETTINGS,
-	Settings,
-	SettingTab,
-} from './settings';
 import { AutoUIInjectorAPI } from './api/public';
 import { embedRegister } from './embed-register';
 import { patchMarkdownSubViews } from './surface/markdown-sub-view';
@@ -19,12 +14,10 @@ import { ejectAllOfZone, injectAllOfZone, refresh } from './inject';
 import { autoUIField, autoUIUpdateEffect } from './surface/codemirror';
 
 export default class AutoUIInjector extends Plugin {
-	settings!: Settings;
 	api!: AutoUIInjectorAPI;
 
 	async onload() {
 		await this.loadSettings();
-		// this.addSettingTab(new SettingTab(this.app, this));
 		this.api = new AutoUIInjectorAPI(this.app);
 
 		// Monkey patch MarkdownEditView
@@ -53,7 +46,13 @@ export default class AutoUIInjector extends Plugin {
 			this.app.vault.on("config-changed", this.onConfigChange.bind(this))
 		);
 		this.registerEvent(
-			this.app.workspace.on("file-open", this.onFileOpen.bind(this))
+			this.app.workspace.on("file-open", this.onFilePathChange.bind(this))
+		);
+		this.registerEvent(
+			this.app.vault.on("rename", (file) => {
+				if (file instanceof TFile)
+					this.onFilePathChange(file);
+			})
 		);
 
 		this.registerEditorExtension(autoUIField);
@@ -71,8 +70,8 @@ export default class AutoUIInjector extends Plugin {
 	async loadSettings() {
 		this.settings = Object.assign(
 			{},
-			DEFAULT_SETTINGS,
-			(await this.loadData()) as Partial<Settings>,
+			// DEFAULT_SETTINGS,
+			// (await this.loadData()) as Partial<Settings>,
 		);
 	}
 
@@ -84,7 +83,7 @@ export default class AutoUIInjector extends Plugin {
 	 * Refresh existing views, so they react to file change.
 	 * @param file - Newly opened file.
 	 */
-	onFileOpen(file: TFile) {
+	onFilePathChange(file: TFile | null) {
 		this.app.workspace.iterateAllLeaves((leaf) => {
 			if ((leaf.view as FileView)?.file === file) {
 				if (leaf.view instanceof FileView) refresh(leaf.view);

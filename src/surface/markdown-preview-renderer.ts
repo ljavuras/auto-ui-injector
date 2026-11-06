@@ -1,33 +1,41 @@
-import { App, MarkdownPreviewRenderer, MarkdownView } from "obsidian";
+import { App, MarkdownPreviewRenderer, MarkdownPreviewView, MarkdownView } from "obsidian";
 import { compareZone, Zone } from "../api/spec";
 import { around } from "monkey-around";
 import { embedRegister } from "../embed-register";
-import { ReadViewRenderer, RendererSection } from "@obsidian-typings/obsidian-public-latest";
+import type { MarkdownPreviewSection } from "../types/obsidian-internal";
 
 const { Body, Afterword, EOF } = Zone;
 const zones = [Body, Afterword, EOF];
-let MarkdownPreviewSection: new (element: string | Node | null) => RendererSection;
+let MarkdownPreviewSection: new (element: string | Node | null) => MarkdownPreviewSection;
 
-function filterInPlace(
-    array: Array<unknown>,
-    predicate: (value: unknown, index: number, array: Array<unknown>) => boolean
+type InjectedMarkdownPreviewSection = MarkdownPreviewSection & {
+    isEmbed: boolean
+};
+
+function filterInPlace<T>(
+    array: Array<T>,
+    predicate: (value: T, index: number, array: Array<T>) => boolean
 ) {
     for(let i = array.length - 1; i >= 0; i--) {
-        if (!predicate(array[i], i, array)) array.splice(i, 1);
+        if (!predicate(array[i] as T, i, array)) array.splice(i, 1);
     }
 }
 
-function injectSections(this: ReadViewRenderer) {
+function injectSections(this: MarkdownPreviewRenderer) {
     if (!MarkdownPreviewSection) {
-        MarkdownPreviewSection = this.sections[0]!.constructor as new (element: string | Node | null) => RendererSection;
+        MarkdownPreviewSection = this.sections[0]!.constructor as new (element: string | Node | null) => MarkdownPreviewSection;
     }
 
-    const view = this.owner.view  // MarkdownPreviewView
-        ?? this.owner.owner;  // MarkdownEmbedView
+    const view = (this.owner as MarkdownPreviewView)?.view;
+        // ?? (this.owner as n1).owner;  // EmbeddedEditorView
+    if (!view) return;
 
     // TODO: find the correct function to patch, `injectSections` should receive
     // a clean array to patch
-    filterInPlace(this.sections, s => !s.isEmbed);
+    filterInPlace<InjectedMarkdownPreviewSection>(
+        this.sections as Array<InjectedMarkdownPreviewSection>,
+        s => !s.isEmbed
+    );
 
     const sectionIndex: Partial<Record<Zone, number>> = {
         [Afterword]: this.sections.findLastIndex(s => !(
@@ -71,8 +79,8 @@ function injectSections(this: ReadViewRenderer) {
             // Afterword always inserts before footnote (after last non-footnote)
             const isBefore = embed.zone === Body? embed.order < 0 : false;
             const embedPos = isBefore
-                ? this.sections[anchorIndex].start
-                : this.sections[anchorIndex].end;
+                ? (this.sections[anchorIndex] as MarkdownPreviewSection).start
+                : (this.sections[anchorIndex] as MarkdownPreviewSection).end;
             const section = new MarkdownPreviewSection(null);
             Object.assign(section, {
                 rendered: true,
@@ -94,7 +102,7 @@ export function patchMarkdownPreviewRenderer(app: App) {
         parseFinish(original) {
             return function(this: MarkdownPreviewRenderer, ...args) {
                 original.apply(this, args);
-                injectSections.call(this as unknown as ReadViewRenderer);
+                injectSections.call(this);
             }
         }
     });
@@ -106,7 +114,10 @@ export function patchMarkdownPreviewRenderer(app: App) {
             const sections = (leaf.view as MarkdownView).previewMode?.renderer.sections;
             if (!sections) return;
             // Filter array in place in case someone required with its identity to be exact
-            filterInPlace(sections, s => !s.isEmbed)
+            filterInPlace<InjectedMarkdownPreviewSection>(
+                sections as Array<InjectedMarkdownPreviewSection>,
+                s => !s.isEmbed
+            );
         })
     }
 }

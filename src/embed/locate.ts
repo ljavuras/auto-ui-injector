@@ -1,7 +1,7 @@
 import { Tree } from "@lezer/common";
 import { AnchorSpec, AnchorType } from "../api/spec";
 import { EditorState } from "@codemirror/state";
-import { ReadViewRenderer } from "@obsidian-typings/obsidian-public-latest";
+import { MarkdownPreviewRenderer } from "obsidian";
 
 function isString(s: unknown) {
     return typeof s === "string" || s instanceof String;
@@ -54,7 +54,7 @@ export function locateOffset(
 
 export function locateSection(
     anchor: AnchorSpec,
-    renderer: ReadViewRenderer
+    renderer: MarkdownPreviewRenderer
 ): number | undefined {
     if (anchor.type === AnchorType.Raw)
         return anchor.locatePreviewRendererSection(renderer);
@@ -66,7 +66,7 @@ export function locateSection(
         const level = (Number.isInteger(match.level)
             && match.level! > 0 && match.level! < 7) ? match.level : undefined;
 
-        return renderer.sections
+        return (renderer.sections)
             .map((s, index) => ({
                 start: s.start.offset,
                 end: s.end.offset,
@@ -75,8 +75,10 @@ export function locateSection(
             }))
             .filter(s => s.level < 7)  // Non headers are at level 7
             .map((s) => {
-                s.text = renderer.text.slice(s.start + 1 + s.level, s.end);
-                return s;
+                return ({
+                    ...s,
+                    text: renderer.text.slice(s.start + 1 + s.level, s.end),
+                });
             })
             .filter(s => {
                 const { text, startsWith, endsWith, includes, regex } = match;

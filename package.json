@@ -1,6 +1,6 @@
 {
 	"name": "auto-ui-injector",
-	"version": "0.0.1",
+	"version": "0.1.0",
 	"description": "Obsidian plugin to automatically inject UI to notes without altering their source.",
 	"main": "main.js",
 	"type": "module",
@@ -14,7 +14,7 @@
 	"license": "0-BSD",
 	"devDependencies": {
 		"@eslint/js": "^9.39.4",
-		"@lezer/common": "^1.5.4",
+		"@lezer/common": "^1.5.5",
 		"@obsidian-typings/obsidian-public-latest": "^6.36.0",
 		"@types/node": "^22.15.17",
 		"@yarnpkg/esbuild-plugin-pnp": "^3.0.0-rc.15",

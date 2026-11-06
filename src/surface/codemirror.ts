@@ -6,7 +6,6 @@ import { isSourceMode } from "./markdown-view";
 import { syntaxTree } from "@codemirror/language";
 import { Zone } from "../api/spec";
 import { embedRegister } from "../embed-register";
-import { SyntaxNode } from "@obsidian-typings/obsidian-public-latest";
 import { compareEmbed } from "../element";
 
 const { Preface, Body, Afterword, EOF } = Zone;
@@ -38,7 +37,7 @@ function buildAutoUIDecorationSet(state: EditorState) {
 
     // Find position of end of frontmatter and start of footnote
     const tree = syntaxTree(state);
-    let node: SyntaxNode | null;
+    let node;
     let frontmatterEndOffset, footnoteStartOffset: number;
     
     node = tree.topNode.firstChild;
@@ -65,7 +64,7 @@ function buildAutoUIDecorationSet(state: EditorState) {
         [EOF]: state.doc.length,
     };
 
-    const builder = new RangeSetBuilder();
+    const builder = new RangeSetBuilder<Decoration>();
     embedRegister.values()
         .filter(embed => zones.includes(embed.zone)
             // Only show Preface in editor if frontmatters are displayed as source
