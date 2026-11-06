@@ -8,6 +8,7 @@ import { embedRegister } from "./embed-register";
 
 export type InjectFunction<T extends View> = (view: T, embed: Embed) => void;
 
+// This map stores [T, InjectFunction<T>] where T extends View
 const injectors = new Map<typeof View, InjectFunction<any>>([
     [View, injectView],
     [ItemView, injectItemView],

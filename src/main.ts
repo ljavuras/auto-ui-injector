@@ -77,7 +77,7 @@ export default class AutoUIInjector extends Plugin {
 	 * Refresh existing views, so they react to file change.
 	 * @param file - Newly opened file.
 	 */
-	onFileOpen(file: TFile) {
+	onFileOpen(file: TFile | null) {
 		this.app.workspace.iterateAllLeaves((leaf) => {
 			if ((leaf.view as FileView)?.file === file) {
 				if (leaf.view instanceof FileView) refresh(leaf.view);

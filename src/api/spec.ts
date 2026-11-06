@@ -1,7 +1,6 @@
-import { View } from "obsidian";
+import { MarkdownPreviewRenderer, View } from "obsidian";
 import * as z from "zod";
 import { EditorState } from "@codemirror/state";
-import { ReadViewRenderer } from "@obsidian-typings/obsidian-public-latest";
 import type { Tree } from "@lezer/common";
 
 export enum Zone {
@@ -44,7 +43,7 @@ export enum AnchorType {
 export interface RawAnchorSpec {
     type: AnchorType.Raw,
     locateSourceOffset: (tree: Tree, state: EditorState) => number,
-    locatePreviewRendererSection: (renderer: ReadViewRenderer) => number,
+    locatePreviewRendererSection: (renderer: MarkdownPreviewRenderer) => number,
 };
 
 export interface SectionAnchorSpec {
@@ -66,7 +65,9 @@ export type AnchorSpec = RawAnchorSpec | SectionAnchorSpec;
 type Position = {
     zone: Exclude<Zone, Zone.Body>,
     order: number,
-} | {
+} | BodyPosition;
+
+export type BodyPosition = {
     zone: Zone.Body,
     order: number,
     anchor: AnchorSpec,
@@ -99,7 +100,7 @@ const SpecObj = z.object({
                         output: z.number()
                     }),
                     locatePreviewRendererSection: z.function({
-                        // input: [z.instanceof(ReadViewRenderer)],
+                        // input: [z.instanceof(MarkdownPreviewRenderer)],
                         input: [z.any()],
                         output: z.number()
                     }),
