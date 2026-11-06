@@ -5,11 +5,6 @@ import {
 	Plugin,
 	TFile,
 } from 'obsidian';
-import {
-	DEFAULT_SETTINGS,
-	Settings,
-	SettingTab,
-} from './settings';
 import { AutoUIInjectorAPI } from './api/public';
 import { embedRegister } from './embed-register';
 import { patchMarkdownSubViews } from './surface/markdown-sub-view';
@@ -19,12 +14,10 @@ import { ejectAllOfZone, injectAllOfZone, refresh } from './inject';
 import { autoUIField, autoUIUpdateEffect } from './surface/codemirror';
 
 export default class AutoUIInjector extends Plugin {
-	settings!: Settings;
 	api!: AutoUIInjectorAPI;
 
 	async onload() {
 		await this.loadSettings();
-		// this.addSettingTab(new SettingTab(this.app, this));
 		this.api = new AutoUIInjectorAPI(this.app);
 
 		// Monkey patch MarkdownEditView
@@ -71,8 +64,8 @@ export default class AutoUIInjector extends Plugin {
 	async loadSettings() {
 		this.settings = Object.assign(
 			{},
-			DEFAULT_SETTINGS,
-			(await this.loadData()) as Partial<Settings>,
+			// DEFAULT_SETTINGS,
+			// (await this.loadData()) as Partial<Settings>,
 		);
 	}
 
