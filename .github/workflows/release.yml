@@ -19,12 +19,12 @@ jobs:
               uses: actions/setup-node@v6
               with:
                   node-version: 24
-                  cache: 'npm'
+                  cache: 'yarn'
 
             - name: Build plugin
               run: |
-                  npm ci
-                  npm run build
+                  yarn install --frozen-lockfile
+                  yarn build
 
             - name: Check for optional styles
               id: styles
