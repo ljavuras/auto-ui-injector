@@ -46,7 +46,13 @@ export default class AutoUIInjector extends Plugin {
 			this.app.vault.on("config-changed", this.onConfigChange.bind(this))
 		);
 		this.registerEvent(
-			this.app.workspace.on("file-open", this.onFileOpen.bind(this))
+			this.app.workspace.on("file-open", this.onFilePathChange.bind(this))
+		);
+		this.registerEvent(
+			this.app.vault.on("rename", (file) => {
+				if (file instanceof TFile)
+					this.onFilePathChange(file);
+			})
 		);
 
 		this.registerEditorExtension(autoUIField);
@@ -77,7 +83,7 @@ export default class AutoUIInjector extends Plugin {
 	 * Refresh existing views, so they react to file change.
 	 * @param file - Newly opened file.
 	 */
-	onFileOpen(file: TFile | null) {
+	onFilePathChange(file: TFile | null) {
 		this.app.workspace.iterateAllLeaves((leaf) => {
 			if ((leaf.view as FileView)?.file === file) {
 				if (leaf.view instanceof FileView) refresh(leaf.view);
