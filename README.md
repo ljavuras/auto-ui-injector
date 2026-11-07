@@ -1,12 +1,11 @@
 # Auto UI Injector
 
+![Daily note example](/assets/hero-landscape.webp)
+
 Auto UI Injector lets you automatically add custom UI elements to Obsidian notes without modifying their contents or inserting code blocks. From daily note navigation and project dashboards to custom backlinks, virtually anything you can build with JavaScript can become part of your notes' interface.
 
 > [!WARNING]
 > Currently, the plugin is usable exclusively through its JavaScript API, thus a scripting plugin is required. UI editor in settings tab may be considered in the future if there is sufficient interest.
-
-Transform your notes into feature rich interface:
-![Daily note example](/assets/daily-note.png)
 
 ## Feature
 
@@ -20,6 +19,7 @@ Transform your notes into feature rich interface:
 
 Available zones to inject your custom UI:
 ![Available zones](/assets/inject-zones.png)
+*Zone "end-matter" is placed after backlinks.*
 
 ## Scope
 
