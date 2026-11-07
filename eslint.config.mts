@@ -13,9 +13,6 @@ export default defineConfig(
 		'package.json',
 		'package-lock.json',
 		'tsconfig.json',
-		'.yarn',
-		'.pnp.cjs',
-		'.pnp.loader.mjs',
 	]),
 	{
 		languageOptions: {
