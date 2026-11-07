@@ -1,10 +1,10 @@
 {
-    "id": "auto-ui-injector",
-    "name": "Auto UI Injector",
-    "version": "0.1.0",
-    "minAppVersion": "1.13.7",
-    "description": "Automatically inject UI to notes without altering their source.",
-    "author": "Ljavuras",
-    "authorUrl": "https://github.com/ljavuras",
-    "isDesktopOnly": false
+	"id": "auto-ui-injector",
+	"name": "Auto UI Injector",
+	"version": "0.1.1",
+	"minAppVersion": "1.13.7",
+	"description": "Automatically inject UI to notes without altering their source.",
+	"author": "Ljavuras",
+	"authorUrl": "https://github.com/ljavuras",
+	"isDesktopOnly": false
 }
