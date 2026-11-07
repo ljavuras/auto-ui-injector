@@ -15,8 +15,6 @@ jobs:
         steps:
             - uses: actions/checkout@v6
 
-            - run: corepack enable
-
             - name: Use Node.js
               uses: actions/setup-node@v6
               with:
@@ -25,8 +23,8 @@ jobs:
 
             - name: Build plugin
               run: |
-                  yarn install --immutable
-                  yarn build
+                  npm ci
+                  npm run build
 
             - name: Check for optional styles
               id: styles
