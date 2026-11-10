@@ -100,11 +100,11 @@ class AutoUIInjectExample {
         {
             position: { zone: "eof", order: 10},
             condition: (view) => {
-                if (!(view instanceof obsidian.MarkdownView)) return;
+                if (!(view instanceof obsidian.MarkdownView)) return false;
                 const path = view.file?.path;
                 const cache = app.metadataCache.getCache(path);
                 const tags = obsidian.getAllTags(cache);
-                return tags.some(tag => /^#note\/entry($|\/)/.test(tag));
+                return tags?.some(tag => /^#note\/entry($|\/)/.test(tag));
             },
             content: (el, view) => datacore.executeJsx(
                 `const { EntryFeed } = await dc.require("path/to/script");
