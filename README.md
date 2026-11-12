@@ -23,7 +23,7 @@ Auto UI Injector lets you automatically add custom UI elements to Obsidian notes
 Available zones to inject your custom UI:
 ![Available zones](/assets/inject-zones.png)
 
-*Zone "end-matter" is placed after backlinks.*
+*Zone `end-matter` is placed after backlinks.*
 
 ## Scope
 
@@ -213,32 +213,6 @@ class AutoUIInjectExample {
 ### Use padding instead of margin
 
 In zones `preface`, `body`, `afterword`, and `eof`, using vertical margin can confuse CodeMirror's height calculation, see [CodeMirror Reference Manual](https://codemirror.net/docs/ref/#view.Decoration^widget^spec.block).
-
-### Internal links won't work directly
-
-`MarkdownView` automatically attaches `onClick` and `onMouseOver` events to anchor tags, so `<a>` in Datacore won't work. `dc.Link` does attach `onClick` but not `onMouseOver`, so hovering won't give you preview.
-
-However, you can implement mouse over yourself:
-
-```tsx
-<dc.Link
-    link={link}
-    onMouseOver={event => {
-        const linktext = link.obsidianLink();
-        if (linktext) {
-            // onInternalLinkMouseover
-            app.workspace.trigger("hover-link", {
-                event,
-                source: "preview",
-                hoverParent: { hoverPopover: null },
-                targetEl: event.currentTarget,
-                linktext: linktext,
-                sourcePath: sourcePath,
-            });
-        }
-    }}
-/>
-```
 
 ## Motivation
 
