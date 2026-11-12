@@ -4,8 +4,11 @@
 
 Auto UI Injector lets you automatically add custom UI elements to Obsidian notes without modifying their contents or inserting code blocks. From daily note navigation and project dashboards to custom backlinks, virtually anything you can build with JavaScript can become part of your notes' interface.
 
-> [!WARNING]
+> [!NOTE]
 > Currently, the plugin is usable exclusively through its JavaScript API, thus a scripting plugin is required. UI editor in settings tab may be considered in the future if there is sufficient interest.
+
+> [!CAUTION]
+> CodeMirror widgets (Auto UIs injected in "preface", "body", "afterword", and "eof" zones in Live Preview), randomly deletes empty lines, use with caution until this bug is fixed. Version control is recommended.
 
 ## Feature
 
@@ -202,6 +205,38 @@ class AutoUIInjectExample {
         },
     ]
 }
+```
+
+## Pitfalls
+
+### Use padding instead of margin
+
+In zones "preface", "body", "afterword", and "eof", using vertical margin can confuse CodeMirror's height calculation, see [CodeMirror Reference Manual](https://codemirror.net/docs/ref/#view.Decoration^widget^spec.block).
+
+### Internal links won't work directly
+
+`MarkdownView` automatically attaches `onClick` and `onMouseOver` events to anchor tags, so `<a>` in Datacore won't work. `dc.Link` does attach `onClick` but not `onMouseOver`, so hovering won't give you preview.
+
+However, you can implement mouse over yourself:
+
+```tsx
+<dc.Link
+    link={link}
+    onMouseOver={event => {
+        const linktext = link.obsidianLink();
+        if (linktext) {
+            // onInternalLinkMouseover
+            app.workspace.trigger("hover-link", {
+                event,
+                source: "preview",
+                hoverParent: { hoverPopover: null },
+                targetEl: event.currentTarget,
+                linktext: linktext,
+                sourcePath: sourcePath,
+            });
+        }
+    }}
+/>
 ```
 
 ## Motivation
