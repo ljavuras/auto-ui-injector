@@ -8,7 +8,7 @@ Auto UI Injector lets you automatically add custom UI elements to Obsidian notes
 > Currently, the plugin is usable exclusively through its JavaScript API, thus a scripting plugin is required. UI editor in settings tab may be considered in the future if there is sufficient interest.
 
 > [!CAUTION]
-> CodeMirror widgets (Auto UIs injected in "preface", "body", "afterword", and "eof" zones in Live Preview), randomly deletes empty lines, use with caution until this bug is fixed. Version control is recommended.
+> CodeMirror widgets (Auto UIs injected in `preface`, `body`, `afterword`, and `eof` zones in Live Preview), randomly deletes empty lines, use with caution until this bug is fixed. Version control is recommended.
 
 ## Feature
 
@@ -22,6 +22,7 @@ Auto UI Injector lets you automatically add custom UI elements to Obsidian notes
 
 Available zones to inject your custom UI:
 ![Available zones](/assets/inject-zones.png)
+
 *Zone "end-matter" is placed after backlinks.*
 
 ## Scope
@@ -211,7 +212,7 @@ class AutoUIInjectExample {
 
 ### Use padding instead of margin
 
-In zones "preface", "body", "afterword", and "eof", using vertical margin can confuse CodeMirror's height calculation, see [CodeMirror Reference Manual](https://codemirror.net/docs/ref/#view.Decoration^widget^spec.block).
+In zones `preface`, `body`, `afterword`, and `eof`, using vertical margin can confuse CodeMirror's height calculation, see [CodeMirror Reference Manual](https://codemirror.net/docs/ref/#view.Decoration^widget^spec.block).
 
 ### Internal links won't work directly
 
