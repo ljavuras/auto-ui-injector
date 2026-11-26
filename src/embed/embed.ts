@@ -26,9 +26,9 @@ export class Embed extends Component {
     }
 
     locateOffset(tree: Tree, state: EditorState): number | undefined {
-        const { zone, anchor } = (this.spec.position as BodyPosition);
+        const { zone, order, anchor } = (this.spec.position as BodyPosition);
         if (zone !== Zone.Body) return undefined;
-        return locateOffset(anchor, tree, state);
+        return locateOffset(order >= 0, anchor, tree, state);
     }
 
     locateSection(renderer: MarkdownPreviewRenderer): number | undefined {
