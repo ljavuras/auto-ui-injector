@@ -28,7 +28,8 @@ export function locateOffset(
                 if (!/HyperMD-header-\d$/.test(node.name)) return true;
 
                 const { from, to } = node;
-                const text = state.doc.sliceString(from, to);
+                const level = Number(node.name.at(-1));
+                const text = state.doc.sliceString(from + level + 1, to);
                 const match = anchor.match;
 
                 if (isString(match.text) && text !== match.text) return true;
@@ -42,7 +43,7 @@ export function locateOffset(
                     && !match.regex.test(text)) return true;
                 if (Number.isInteger(match.level)
                     && match.level! > 0 && match.level! < 7
-                    && !node.name.endsWith(`${match.level}`)) return true;
+                    && match.level !== level) return true;
 
                 offset = isAfter? to : from - 1;
                 occurrence--;
