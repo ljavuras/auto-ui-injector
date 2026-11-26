@@ -73,7 +73,7 @@ export function locateSection(
                 level: s.level,
                 index,
             }))
-            .filter(s => s.level < 7)  // Non headers are at level 7
+            .filter(s => s.level > 0 && s.level < 7)  // Non headers are at level 7
             .map((s) => {
                 return ({
                     ...s,
