@@ -8,6 +8,7 @@ function isString(s: unknown) {
 }
 
 export function locateOffset(
+    isAfter: boolean,
     anchor: AnchorSpec,
     tree: Tree,
     state: EditorState
@@ -23,28 +24,30 @@ export function locateOffset(
         )? anchor.occurrence : 1) as number;
         tree.iterate({
             enter(node) {
-                if (occurrence === 0) return;
-                if (!/^header_header-\d$/.test(node.name)) return;
+                if (occurrence === 0) return false;
+                if (!/HyperMD-header-\d$/.test(node.name)) return true;
 
                 const { from, to } = node;
-                const text = state.doc.sliceString(from, to);
+                const level = Number(node.name.at(-1));
+                const text = state.doc.sliceString(from + level + 1, to);
                 const match = anchor.match;
 
-                if (isString(match.text) && text !== match.text) return;
+                if (isString(match.text) && text !== match.text) return true;
                 if (isString(match.startsWith)
-                    && !text.startsWith(match.startsWith)) return;
+                    && !text.startsWith(match.startsWith)) return true;
                 if (isString(match.endsWith)
-                    && !text.endsWith(match.endsWith)) return;
+                    && !text.endsWith(match.endsWith)) return true;
                 if (isString(match.includes)
-                    && !text.includes(match.includes)) return;
+                    && !text.includes(match.includes)) return true;
                 if (match.regex instanceof RegExp
-                    && !match.regex.test(text)) return;
+                    && !match.regex.test(text)) return true;
                 if (Number.isInteger(match.level)
                     && match.level! > 0 && match.level! < 7
-                    && node.name !== `header_header-${match.level}`) return;
+                    && match.level !== level) return true;
 
-                offset = to;
+                offset = isAfter? to : from - 1;
                 occurrence--;
+                return true;
             }
         });
         return offset;
@@ -73,7 +76,7 @@ export function locateSection(
                 level: s.level,
                 index,
             }))
-            .filter(s => s.level < 7)  // Non headers are at level 7
+            .filter(s => s.level > 0 && s.level < 7)  // Non headers are at level 7
             .map((s) => {
                 return ({
                     ...s,
